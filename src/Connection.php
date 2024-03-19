@@ -46,11 +46,10 @@ class Connection extends Program
      * @param string $transactionSignature
      * @return array|null
      */
-    public function getTransaction(string $transactionSignature, ?Commitment $commitment = Commitment::finalized()): array
+    public function getTransaction(string $transactionSignature): array
     {
       $config = [
         "maxSupportedTransactionVersion" => 0,
-        "commitment" => $commitment->__toString(),
       ];
       return $this->client->call('getTransaction', [$transactionSignature, $config]);
     }
