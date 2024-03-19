@@ -7,6 +7,11 @@ use Tighten\SolanaPhpSdk\Util\Commitment;
 
 class Connection extends Program
 {
+    public function getCommitmentString(?Commitment $commitment = null) {
+        if ($commitment === null) return Commitment::finalized()->__toString();
+        return $commitment->__toString();
+    }
+
     /**
      * @param string $pubKey
      * @return array
@@ -46,10 +51,11 @@ class Connection extends Program
      * @param string $transactionSignature
      * @return array|null
      */
-    public function getTransaction(string $transactionSignature): array
+    public function getTransaction(string $transactionSignature, ?Commitment $commitment = null): array
     {
       $config = [
         "maxSupportedTransactionVersion" => 0,
+        "commitment" => $this->getCommitmentString($commitment),
       ];
       return $this->client->call('getTransaction', [$transactionSignature, $config]);
     }
