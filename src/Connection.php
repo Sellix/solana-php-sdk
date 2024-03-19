@@ -50,8 +50,8 @@ class Connection extends Program
     {
       $config = [
         "maxSupportedTransactionVersion" => 0,
-        "commitment" => $commitment,
-    ];
+        "commitment" => $commitment->__toString(),
+      ];
       return $this->client->call('getTransaction', [$transactionSignature, $config]);
     }
 
