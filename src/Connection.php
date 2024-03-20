@@ -7,6 +7,33 @@ use Tighten\SolanaPhpSdk\Util\Commitment;
 
 class Connection extends Program
 {
+    /**
+     * @param Commitment|null $commitment
+     * @return array
+     */
+    public function getLatestBlockhash(?Commitment $commitment = null): array {
+        $object = [
+            "commitment" => $this->getCommitmentString($commitment),
+        ];
+        return (array) $this->client->call('getLatestBlockhash', [$object])['value'];
+    }
+
+    /**
+     * @param string $blockhash
+     * @param Commitment|null $commitment
+     * @return bool
+     */
+    public function isBlockhashValid(string $blockhash, ?Commitment $commitment = null): bool {
+        $object = [
+            "commitment" => $this->getCommitmentString($commitment),
+        ];
+        return (bool) $this->client->call('isBlockhashValid', [$blockhash, $object])['value'];
+    }
+
+    /**
+     * @param Commitment|null $commitment
+     * @return string
+     */
     public function getCommitmentString(?Commitment $commitment = null) {
         if ($commitment === null) return Commitment::finalized()->__toString();
         return $commitment->__toString();
@@ -61,6 +88,7 @@ class Connection extends Program
     }
 
     /**
+     * @deprecated
      * @param Commitment|null $commitment
      * @return array
      * @throws Exceptions\GenericException|Exceptions\MethodNotFoundException|Exceptions\InvalidIdResponseException
