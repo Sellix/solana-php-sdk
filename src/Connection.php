@@ -125,7 +125,6 @@ class Connection extends Program
             $transaction->recentBlockhash = $this->getRecentBlockhash()['blockhash'];
         }
 
-        // @phpstan-ignore-next-line
         $transaction->sign(...$signers);
 
         $rawBinaryString = $transaction->serialize(false);
@@ -155,7 +154,6 @@ class Connection extends Program
      */
     public function simulateTransaction(Transaction $transaction, array $signers, array $params = []): array|Response
     {
-        // @phpstan-ignore-next-line
         $transaction->sign(...$signers);
 
         $rawBinaryString = $transaction->serialize(false);

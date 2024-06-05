@@ -198,6 +198,14 @@ class Buffer implements Countable
     }
 
     /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    /**
      * Return string representation of $value.
      *
      * @return string

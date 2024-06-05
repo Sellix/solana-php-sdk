@@ -95,7 +95,7 @@ class BinaryReader
     {
         $value = $this->buffer->slice($this->offset, $length, $datatype, false)->value();
         $this->offset += $length;
-        return $value;
+        return $value ?? 0;
     }
 
     /**

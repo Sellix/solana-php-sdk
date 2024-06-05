@@ -42,7 +42,7 @@ class Message
 
     /**
      * @param MessageHeader $header
-     * @param array<string> $accountKeys
+     * @param array<string|PublicKey> $accountKeys
      * @param string $recentBlockhash
      * @param array<CompiledInstruction> $instructions
      */
@@ -53,8 +53,8 @@ class Message
         array $instructions
     ) {
         $this->header = $header;
-        $this->accountKeys = array_map(function (string $accountKey) {
-            return new PublicKey($accountKey);
+        $this->accountKeys = array_map(function (string|PublicKey $accountKey) {
+            return is_string($accountKey) ? new PublicKey($accountKey) : $accountKey;
         }, $accountKeys);
         $this->recentBlockhash = $recentBlockhash;
         $this->instructions = $instructions;

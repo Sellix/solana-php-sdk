@@ -68,12 +68,12 @@ class PublicKey implements HasPublicKey
 
     /**
      * Check if two publicKeys are equal
-     * @param mixed $publicKey
+     * @param PublicKey $publicKey
      * @return bool
      */
-    public function equals(mixed $publicKey): bool
+    public function equals(PublicKey $publicKey): bool
     {
-        return $publicKey instanceof PublicKey && $publicKey->buffer === $this->buffer;
+        return $publicKey->buffer === $this->buffer;
     }
 
     /**
@@ -115,9 +115,17 @@ class PublicKey implements HasPublicKey
      * Return the base-58 representation of the public key
      * @return string
      */
-    public function toBase58String(): string
+    public function toString(): string
     {
         return $this->toBase58();
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->toString();
     }
 
     /**

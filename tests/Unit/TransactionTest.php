@@ -307,7 +307,10 @@ class TransactionTest extends TestCase
         $transaction = Transaction::populate($message, $signatures);
         $this->assertCount(1, $transaction->instructions);
         $this->assertCount(2, $transaction->signatures);
-        $this->assertEquals($recentBlockhash, $transaction->recentBlockhash);
+        $this->assertEquals(
+            $recentBlockhash->toBinaryString(),
+            $transaction->recentBlockhash
+        );
     }
 
     /**

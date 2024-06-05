@@ -348,7 +348,8 @@ class Transaction
      * @param array<PublicKey> ...$signers
      * @return void
      */
-    public function setSigners(array ...$signers): void
+    // @phpcs:ignore
+    public function setSigners(...$signers): void
     {
         $uniqueSigners = $this->arrayUnique($signers);
 
@@ -395,7 +396,8 @@ class Transaction
      * @param array<Signer|Keypair> ...$signers
      * @return void
      */
-    public function sign(array ...$signers): void
+    // @phpcs:ignore
+    public function sign(...$signers): void
     {
         $this->partialSign(...$signers);
     }
@@ -407,10 +409,11 @@ class Transaction
      *
      * All the caveats from the `sign` method apply to `partialSign`
      *
-     * @param array<Signer|Keypair> ...$signers
+     * @param array<mixed> ...$signers
      * @return void
      */
-    public function partialSign(array ...$signers): void
+    // @phpcs:ignore
+    public function partialSign(...$signers): void
     {
         // Dedupe signers
         $uniqueSigners = $this->arrayUnique($signers);
@@ -647,12 +650,12 @@ class Transaction
 
     /**
      * @param array<AccountMeta> $haystack
-     * @param PublicKey|SignaturePubkeyPair|AccountMeta|string $needle
+     * @param mixed $needle
      * @return int
      */
     protected static function arraySearchAccountMetaForPublicKey(
         array $haystack,
-        PublicKey|SignaturePubkeyPair|AccountMeta|string $needle
+        mixed $needle
     ): int {
         $publicKeyToSearchFor = static::toPublicKey($needle);
 
