@@ -1,16 +1,20 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Borsh;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\TodoException;
-use Tighten\SolanaPhpSdk\Util\Buffer;
+namespace MultipleChain\SolanaSDK\Borsh;
+
 use Closure;
+use MultipleChain\SolanaSDK\Util\Buffer;
 
 class BinaryWriter
 {
     protected Buffer $buffer;
     protected int $length;
 
+    /**
+     * BinaryWriter constructor.
+     */
     public function __construct()
     {
         $this->buffer = Buffer::from();
@@ -120,20 +124,21 @@ class BinaryWriter
     }
 
     /**
-     * @param array $array
-     * @return $this
+     * @param array<mixed> $array
+     * @return BinaryWriter
      */
-    public function writeFixedArray(array $array)
+    public function writeFixedArray(array $array): BinaryWriter
     {
         $this->writeBuffer(Buffer::from($array));
         return $this;
     }
 
     /**
-     * @param array $array
-     * @return $this
+     * @param array<mixed> $array
+     * @param Closure $writeFn
+     * @return BinaryWriter
      */
-    public function writeArray(array $array, Closure $writeFn)
+    public function writeArray(array $array, Closure $writeFn): BinaryWriter
     {
         $this->writeU32(sizeof($array));
         foreach ($array as $item) {
@@ -154,9 +159,9 @@ class BinaryWriter
     }
 
     /**
-     * @return array
+     * @return array<int>
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->buffer->slice(0, $this->length)->toArray();
     }

@@ -1,21 +1,30 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Programs;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Program;
-use Tighten\SolanaPhpSdk\TransactionInstruction;
-use Tighten\SolanaPhpSdk\PublicKey;
+namespace MultipleChain\SolanaSDK\Programs;
+
+use MultipleChain\SolanaSDK\Program;
+use MultipleChain\SolanaSDK\TransactionInstruction;
+use MultipleChain\SolanaSDK\PublicKey;
 
 class ComputeBudgetProgram extends Program
 {
-    public const programId = 'ComputeBudget111111111111111111111111111111';
+    public const PROGRAM_ID = 'ComputeBudget111111111111111111111111111111';
 
-    static function programId(): PublicKey
+    /**
+     * @return PublicKey
+     */
+    public static function programId(): PublicKey
     {
-        return new PublicKey(static::programId);
+        return new PublicKey(static::PROGRAM_ID);
     }
 
-    static function setComputeUnitLimit($units)
+    /**
+     * @param array<int> $units
+     * @return TransactionInstruction
+     */
+    public static function setComputeUnitLimit(array $units): TransactionInstruction
     {
         $data = [
             // uint8
@@ -30,7 +39,11 @@ class ComputeBudgetProgram extends Program
         );
     }
 
-    static function setComputeUnitPrice($microLamports)
+    /**
+     * @param array<int> $microLamports
+     * @return TransactionInstruction
+     */
+    public static function setComputeUnitPrice(array $microLamports): TransactionInstruction
     {
         $data = [
             // uint8

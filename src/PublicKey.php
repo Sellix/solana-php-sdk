@@ -1,19 +1,30 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK;
 
 use ParagonIE_Sodium_Compat;
 use RangeException;
 use StephenHill\Base58;
-use Tighten\SolanaPhpSdk\Exceptions\BaseSolanaPhpSdkException;
-use Tighten\SolanaPhpSdk\Exceptions\InputValidationException;
-use Tighten\SolanaPhpSdk\Util\Buffer;
-use Tighten\SolanaPhpSdk\Util\HasPublicKey;
+use MultipleChain\SolanaSDK\Exceptions\BaseSolanaPhpSdkException;
+use MultipleChain\SolanaSDK\Exceptions\InputValidationException;
+use MultipleChain\SolanaSDK\Util\Buffer;
+use MultipleChain\SolanaSDK\Util\HasPublicKey;
 
 class PublicKey implements HasPublicKey
 {
-    const LENGTH = 32;
-    const MAX_SEED_LENGTH = 32;
+    /**
+     * The length of public keys
+     * @var int
+     */
+    public const LENGTH = 32;
+
+    /**
+     * The maximum seed length
+     * @var int
+     */
+    public const MAX_SEED_LENGTH = 32;
 
     /**
      * @var Buffer
@@ -21,9 +32,9 @@ class PublicKey implements HasPublicKey
     protected Buffer $buffer;
 
     /**
-     * @param array|string $bn
+     * @param array<mixed>|string|int $bn
      */
-    public function __construct($bn)
+    public function __construct(array|string|int $bn)
     {
         if (is_integer($bn)) {
             $this->buffer = Buffer::from()->pad(self::LENGTH, $bn);
@@ -37,12 +48,11 @@ class PublicKey implements HasPublicKey
             } else {
                 $this->buffer = Buffer::fromBase58($bn);
             }
-
         } else {
             $this->buffer = Buffer::from($bn);
         }
 
-        if (sizeof($this->buffer) !== self::LENGTH) {
+        if (self::LENGTH !== sizeof($this->buffer)) {
             $len = sizeof($this->buffer);
             throw new InputValidationException("Invalid public key input. Expected length 32. Found: {$len}");
         }
@@ -58,14 +68,17 @@ class PublicKey implements HasPublicKey
 
     /**
      * Check if two publicKeys are equal
+     * @param mixed $publicKey
+     * @return bool
      */
-    public function equals($publicKey): bool
+    public function equals(mixed $publicKey): bool
     {
         return $publicKey instanceof PublicKey && $publicKey->buffer === $this->buffer;
     }
 
     /**
      * Return the base-58 representation of the public key
+     * @return string
      */
     public function toBase58(): string
     {
@@ -74,6 +87,7 @@ class PublicKey implements HasPublicKey
 
     /**
      * Return the byte array representation of the public key
+     * @return array<int>
      */
     public function toBytes(): array
     {
@@ -82,6 +96,7 @@ class PublicKey implements HasPublicKey
 
     /**
      * Return the Buffer representation of the public key
+     * @return Buffer
      */
     public function toBuffer(): Buffer
     {
@@ -93,13 +108,14 @@ class PublicKey implements HasPublicKey
      */
     public function toBinaryString(): string
     {
-        return $this->buffer;
+        return $this->buffer->toString();
     }
 
     /**
      * Return the base-58 representation of the public key
+     * @return string
      */
-    public function __toString()
+    public function toBase58String(): string
     {
         return $this->toBase58();
     }
@@ -123,7 +139,7 @@ class PublicKey implements HasPublicKey
             ->push($programId)
         ;
 
-        $hash = hash('sha256', $buffer);
+        $hash = hash('sha256', $buffer->toString());
         $binaryString = sodium_hex2bin($hash);
         return new PublicKey($binaryString);
     }
@@ -131,7 +147,7 @@ class PublicKey implements HasPublicKey
     /**
      * Derive a program address from seeds and a program ID.
      *
-     * @param array $seeds
+     * @param array<mixed> $seeds
      * @param PublicKey $programId
      * @return PublicKey
      */
@@ -148,7 +164,7 @@ class PublicKey implements HasPublicKey
 
         $buffer->push($programId)->push('ProgramDerivedAddress');
 
-        $hash = hash('sha256', $buffer);
+        $hash = hash('sha256', $buffer->toString());
         $binaryString = sodium_hex2bin($hash);
 
         if (static::isOnCurve($binaryString)) {
@@ -159,15 +175,15 @@ class PublicKey implements HasPublicKey
     }
 
     /**
-     * @param array $seeds
+     * @param array<mixed> $seeds
      * @param PublicKey $programId
-     * @return array 2 elements, [0] = PublicKey, [1] = integer
+     * @return array<mixed> 2 elements, [0] = PublicKey, [1] = integer
      */
-    static function findProgramAddress(array $seeds, PublicKey $programId): array
+    public static function findProgramAddress(array $seeds, PublicKey $programId): array
     {
         $nonce = 255;
 
-        while ($nonce != 0) {
+        while (0 != $nonce) {
             try {
                 $copyOfSeedsWithNonce = $seeds;
                 array_push($copyOfSeedsWithNonce, [$nonce]);
@@ -184,8 +200,10 @@ class PublicKey implements HasPublicKey
 
     /**
      * Check that a pubkey is on the ed25519 curve.
+     * @param mixed $publicKey
+     * @return bool
      */
-    static function isOnCurve($publicKey): bool
+    public static function isOnCurve(mixed $publicKey): bool
     {
         try {
             $binaryString = $publicKey instanceof PublicKey
@@ -194,9 +212,9 @@ class PublicKey implements HasPublicKey
 
             /**
              * Sodium extension method sometimes returns "conversion failed" exception.
-             * $_ = sodium_crypto_sign_ed25519_pk_to_curve25519($binaryString);
+             * sodium_crypto_sign_ed25519_pk_to_curve25519($binaryString);
              */
-            $_ = ParagonIE_Sodium_Compat::crypto_sign_ed25519_pk_to_curve25519($binaryString);
+            ParagonIE_Sodium_Compat::crypto_sign_ed25519_pk_to_curve25519($binaryString);
 
             return true;
         } catch (RangeException $exception) {
@@ -214,6 +232,9 @@ class PublicKey implements HasPublicKey
         return new Base58();
     }
 
+    /**
+     * @return PublicKey
+     */
     public function getPublicKey(): PublicKey
     {
         return $this;

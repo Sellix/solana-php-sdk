@@ -1,23 +1,33 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Tests\Unit;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Account;
-use Tighten\SolanaPhpSdk\Keypair;
-use Tighten\SolanaPhpSdk\Tests\TestCase;
+namespace MultipleChain\SolanaSDK\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+use MultipleChain\SolanaSDK\Account;
+use MultipleChain\SolanaSDK\Keypair;
 
 class AccountTest extends TestCase
 {
-    /** @test */
-    public function it_generate_new_account()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_generate_new_account(): void
     {
         $account = new Account();
 
         $this->assertEquals(64, sizeof($account->getSecretKey()));
     }
 
-    /** @test */
-    public function it_account_from_secret_key()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_account_from_secret_key(): void
     {
         $secretKey = [
             153, 218, 149, 89, 225, 94, 145, 62, 233, 171, 46, 83, 227, 223, 173, 87,
@@ -31,8 +41,12 @@ class AccountTest extends TestCase
         $this->assertEquals('2q7pyhPwAwZ3QMfZrnAbDhnh9mDUqycszcpf86VgQxhF', $account->getPublicKey()->toBase58());
     }
 
-    /** @test */
-    public function it_account_keypair()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_account_keypair(): void
     {
         $expectedAccount = new Account();
         $keypair = Keypair::fromSecretKey($expectedAccount->getSecretKey());

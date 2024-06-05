@@ -1,31 +1,33 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Programs;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\AccountNotFoundException;
-use Tighten\SolanaPhpSdk\Program;
-use Tighten\SolanaPhpSdk\PublicKey;
-use Tighten\SolanaPhpSdk\TransactionInstruction;
-use Tighten\SolanaPhpSdk\Util\AccountMeta;
+namespace MultipleChain\SolanaSDK\Programs;
+
+use MultipleChain\SolanaSDK\Program;
+use MultipleChain\SolanaSDK\PublicKey;
+use MultipleChain\SolanaSDK\Util\AccountMeta;
+use MultipleChain\SolanaSDK\TransactionInstruction;
+use MultipleChain\SolanaSDK\Exceptions\AccountNotFoundException;
 
 class SystemProgram extends Program
 {
-    const PROGRAM_INDEX_CREATE_ACCOUNT = 0;
-    const PROGRAM_INDEX_TRANSFER = 2;
+    public const PROGRAM_INDEX_CREATE_ACCOUNT = 0;
+    public const PROGRAM_INDEX_TRANSFER = 2;
 
     /**
      * Public key that identifies the System program
      *
      * @return PublicKey
      */
-    static function programId(): PublicKey
+    public static function programId(): PublicKey
     {
         return new PublicKey('11111111111111111111111111111111');
     }
 
     /**
      * @param string $pubKey
-     * @return array
+     * @return array<mixed>
      */
     public function getAccountInfo(string $pubKey): array
     {
@@ -49,7 +51,7 @@ class SystemProgram extends Program
 
     /**
      * @param string $transactionSignature
-     * @return array
+     * @return array<mixed>
      */
     public function getConfirmedTransaction(string $transactionSignature): array
     {
@@ -57,10 +59,11 @@ class SystemProgram extends Program
     }
 
     /**
-     * NEW: This method is only available in solana-core v1.7 or newer. Please use getConfirmedTransaction for solana-core v1.6
+     * NEW: This method is only available in solana-core v1.7 or newer.
+     * > Please use getConfirmedTransaction for solana-core v1.6
      *
      * @param string $transactionSignature
-     * @return array
+     * @return array<mixed>
      */
     public function getTransaction(string $transactionSignature): array
     {
@@ -75,12 +78,11 @@ class SystemProgram extends Program
      * @param int $lamports
      * @return TransactionInstruction
      */
-    static public function transfer(
+    public static function transfer(
         PublicKey $fromPubkey,
         PublicKey $toPublicKey,
         int $lamports
-    ): TransactionInstruction
-    {
+    ): TransactionInstruction {
         // 4 byte instruction index + 8 bytes lamports
         // look at https://www.php.net/manual/en/function.pack.php for formats.
         $data = [
@@ -101,14 +103,23 @@ class SystemProgram extends Program
         );
     }
 
-    static public function createAccount(
+    /**
+     * Generate a transaction instruction that creates a new account
+     *
+     * @param PublicKey $fromPubkey
+     * @param PublicKey $newAccountPublicKey
+     * @param int $lamports
+     * @param int $space
+     * @param PublicKey $programId
+     * @return TransactionInstruction
+     */
+    public static function createAccount(
         PublicKey $fromPubkey,
         PublicKey $newAccountPublicKey,
         int $lamports,
         int $space,
         PublicKey $programId
-    ): TransactionInstruction
-    {
+    ): TransactionInstruction {
         // look at https://www.php.net/manual/en/function.pack.php for formats.
         $data = [
             // uint32
@@ -117,7 +128,6 @@ class SystemProgram extends Program
             ...unpack("C*", pack("P", $lamports)),
             // int64
             ...unpack("C*", pack("P", $space)),
-            //
             ...$programId->toBytes(),
         ];
         $keys = [

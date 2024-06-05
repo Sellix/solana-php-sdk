@@ -1,9 +1,11 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Accounts;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Borsh\Borsh;
-use Tighten\SolanaPhpSdk\Borsh\BorshDeserializable;
+namespace MultipleChain\SolanaSDK\Accounts;
+
+use MultipleChain\SolanaSDK\Borsh\Borsh;
+use MultipleChain\SolanaSDK\Borsh\BorshDeserializable;
 
 class Metadata
 {
@@ -25,7 +27,11 @@ class Metadata
         ],
     ];
 
-    public static function fromBuffer(array $buffer): self
+    /**
+     * @param array<mixed> $buffer
+     * @return mixed
+     */
+    public static function fromBuffer(array $buffer): mixed
     {
         return Borsh::deserialize(self::SCHEMA, self::class, $buffer);
     }

@@ -1,14 +1,16 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Util;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\InputValidationException;
+namespace MultipleChain\SolanaSDK\Util;
+
+use MultipleChain\SolanaSDK\Exceptions\InputValidationException;
 
 class Commitment
 {
-    const FINALIZED = 'finalized';
-    const CONFIRMED = 'confirmed';
-    const PROCESSED = 'processed';
+    public const FINALIZED = 'finalized';
+    public const CONFIRMED = 'confirmed';
+    public const PROCESSED = 'processed';
 
     protected string $commitmentLevel;
 
@@ -17,11 +19,13 @@ class Commitment
      */
     public function __construct(string $commitmentLevel)
     {
-        if (! in_array($commitmentLevel, [
+        if (
+            ! in_array($commitmentLevel, [
             self::FINALIZED,
             self::CONFIRMED,
             self::PROCESSED,
-        ])) {
+            ])
+        ) {
             throw new InputValidationException('Invalid commitment level.');
         }
 
@@ -55,7 +59,7 @@ class Commitment
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->commitmentLevel;
     }

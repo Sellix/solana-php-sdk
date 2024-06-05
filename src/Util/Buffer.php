@@ -1,34 +1,35 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Util;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK\Util;
 
 use Countable;
-use Tighten\SolanaPhpSdk\Exceptions\InputValidationException;
-use Tighten\SolanaPhpSdk\Exceptions\TodoException;
-use Tighten\SolanaPhpSdk\PublicKey;
 use SplFixedArray;
+use MultipleChain\SolanaSDK\PublicKey;
+use MultipleChain\SolanaSDK\Exceptions\InputValidationException;
 
 /**
  * A convenient wrapper class around an array of bytes (int's).
  */
 class Buffer implements Countable
 {
-    const TYPE_STRING = 'string';
-    const TYPE_BYTE = 'byte';
-    const TYPE_SHORT = 'short';
-    const TYPE_INT = 'int';
-    const TYPE_LONG = 'long';
-    const TYPE_FLOAT = 'float';
+    public const TYPE_STRING = 'string';
+    public const TYPE_BYTE = 'byte';
+    public const TYPE_SHORT = 'short';
+    public const TYPE_INT = 'int';
+    public const TYPE_LONG = 'long';
+    public const TYPE_FLOAT = 'float';
 
-    const FORMAT_CHAR_SIGNED = 'c';
-    const FORMAT_CHAR_UNSIGNED = 'C';
-    const FORMAT_SHORT_16_SIGNED = 's';
-    const FORMAT_SHORT_16_UNSIGNED = 'v';
-    const FORMAT_LONG_32_SIGNED = 'l';
-    const FORMAT_LONG_32_UNSIGNED = 'V';
-    const FORMAT_LONG_LONG_64_SIGNED = 'q';
-    const FORMAT_LONG_LONG_64_UNSIGNED = 'P';
-    const FORMAT_FLOAT = 'e';
+    public const FORMAT_CHAR_SIGNED = 'c';
+    public const FORMAT_CHAR_UNSIGNED = 'C';
+    public const FORMAT_SHORT_16_SIGNED = 's';
+    public const FORMAT_SHORT_16_UNSIGNED = 'v';
+    public const FORMAT_LONG_32_SIGNED = 'l';
+    public const FORMAT_LONG_32_UNSIGNED = 'V';
+    public const FORMAT_LONG_LONG_64_SIGNED = 'q';
+    public const FORMAT_LONG_LONG_64_UNSIGNED = 'P';
+    public const FORMAT_FLOAT = 'e';
 
     /**
      * @var array<int>
@@ -47,8 +48,10 @@ class Buffer implements Countable
 
     /**
      * @param mixed $value
+     * @param ?string $datatype
+     * @param ?bool $signed
      */
-    public function __construct($value = null, ?string $datatype = null, ?bool $signed = null)
+    public function __construct(mixed $value = null, ?string $datatype = null, ?bool $signed = null)
     {
         $this->datatype = $datatype;
         $this->signed = $signed;
@@ -72,7 +75,7 @@ class Buffer implements Countable
             $this->data = $value->toArray();
             $this->datatype = $value->datatype;
             $this->signed = $value->signed;
-        } elseif ($value == null) {
+        } elseif (null == $value) {
             $this->data = [];
         } elseif (method_exists($value, 'toArray')) {
             $this->data = $value->toArray();
@@ -82,12 +85,12 @@ class Buffer implements Countable
     }
 
     /**
-     * For convenience.
-     *
-     * @param $value
+     * @param mixed $value
+     * @param ?string $format
+     * @param ?bool $signed
      * @return Buffer
      */
-    public static function from($value = null, ?string $format = null, ?bool $signed = null): Buffer
+    public static function from(mixed $value = null, ?string $format = null, ?bool $signed = null): Buffer
     {
         return new static($value, $format, $signed);
     }
@@ -106,11 +109,11 @@ class Buffer implements Countable
     }
 
     /**
-     * @param $len
+     * @param int $len
      * @param int $val
      * @return $this
      */
-    public function pad($len, int $val = 0): Buffer
+    public function pad(int $len, int $val = 0): Buffer
     {
         $this->data = array_pad($this->data, $len, $val);
 
@@ -118,10 +121,10 @@ class Buffer implements Countable
     }
 
     /**
-     * @param $source
-     * @return $this
+     * @param mixed $source
+     * @return Buffer
      */
-    public function push($source): Buffer
+    public function push(mixed $source): Buffer
     {
         $sourceAsBuffer = Buffer::from($source);
 
@@ -131,6 +134,10 @@ class Buffer implements Countable
     }
 
     /**
+     * @param int $offset
+     * @param int|null $length
+     * @param ?string $format
+     * @param ?bool $signed
      * @return Buffer
      */
     public function slice(int $offset, ?int $length = null, ?string $format = null, ?bool $signed = null): Buffer
@@ -139,6 +146,8 @@ class Buffer implements Countable
     }
 
     /**
+     * @param int $offset
+     * @param int|null $length
      * @return Buffer
      */
     public function splice(int $offset, ?int $length = null): Buffer
@@ -147,7 +156,7 @@ class Buffer implements Countable
     }
 
     /**
-     * @return ?int
+     * @return int|null
      */
     public function shift(): ?int
     {
@@ -155,7 +164,8 @@ class Buffer implements Countable
     }
 
     /**
-     * @return $this
+     * @param int $size
+     * @return Buffer
      */
     public function fixed(int $size): Buffer
     {
@@ -169,7 +179,7 @@ class Buffer implements Countable
     /**
      * Return binary representation of $value.
      *
-     * @return array
+     * @return array<int>
      */
     public function toArray(): array
     {
@@ -178,12 +188,11 @@ class Buffer implements Countable
 
     /**
      * Return binary string representation of $value.
-     *
      * @return string
      */
     public function toString(): string
     {
-        return $this;
+        return pack('C*', ...$this->toArray());
     }
 
     /**
@@ -197,21 +206,11 @@ class Buffer implements Countable
     }
 
     /**
-     * @return int|void
-     * @throws InputValidationException
+     * @return int
      */
-    public function count()
+    public function count(): int
     {
         return sizeof($this->toArray());
-    }
-
-    /**
-     * @return string
-     * @throws InputValidationException
-     */
-    public function __toString()
-    {
-        return pack('C*', ...$this->toArray());
     }
 
     /**
@@ -219,15 +218,16 @@ class Buffer implements Countable
      *
      * Note: it is expected that the ->fixed($length) method has already been called.
      *
+     * @param int|null $length
      * @return mixed
      */
-    public function value(?int $length = null)
+    public function value(?int $length = null): mixed
     {
         if ($length) {
             $this->fixed($length);
         }
 
-        if ($this->datatype === self::TYPE_STRING) {
+        if (self::TYPE_STRING === $this->datatype) {
             return ord(pack("C*", ...$this->toArray()));
         } else {
             return unpack($this->computedFormat(), pack("C*", ...$this->toArray()))[1];
@@ -238,21 +238,29 @@ class Buffer implements Countable
      * @return string
      * @throws InputValidationException
      */
-    protected function computedFormat()
+    protected function computedFormat(): string
     {
         if (! $this->datatype) {
-            throw new InputValidationException('Trying to calculate format of unspecified buffer. Please specify a datatype.');
+            throw new InputValidationException(
+                'Trying to calculate format of unspecified buffer. Please specify a datatype.'
+            );
         }
 
         switch ($this->datatype) {
-            case self::TYPE_STRING: return self::FORMAT_CHAR_UNSIGNED;
-            case self::TYPE_BYTE: return $this->signed ? self::FORMAT_CHAR_SIGNED : self::FORMAT_CHAR_UNSIGNED;
-            case self::TYPE_SHORT: return $this->signed ? self::FORMAT_SHORT_16_SIGNED : self::FORMAT_SHORT_16_UNSIGNED;
-            case self::TYPE_INT: return $this->signed ? self::FORMAT_LONG_32_SIGNED : self::FORMAT_LONG_32_UNSIGNED;
-            case self::TYPE_LONG: return $this->signed ? self::FORMAT_LONG_LONG_64_SIGNED : self::FORMAT_LONG_LONG_64_UNSIGNED;
-            case self::TYPE_FLOAT: return self::FORMAT_FLOAT;
-            default: throw new InputValidationException("Unsupported datatype.");
+            case self::TYPE_STRING:
+                return self::FORMAT_CHAR_UNSIGNED;
+            case self::TYPE_BYTE:
+                return $this->signed ? self::FORMAT_CHAR_SIGNED : self::FORMAT_CHAR_UNSIGNED;
+            case self::TYPE_SHORT:
+                return $this->signed ? self::FORMAT_SHORT_16_SIGNED : self::FORMAT_SHORT_16_UNSIGNED;
+            case self::TYPE_INT:
+                return $this->signed ? self::FORMAT_LONG_32_SIGNED : self::FORMAT_LONG_32_UNSIGNED;
+            case self::TYPE_LONG:
+                return $this->signed ? self::FORMAT_LONG_LONG_64_SIGNED : self::FORMAT_LONG_LONG_64_UNSIGNED;
+            case self::TYPE_FLOAT:
+                return self::FORMAT_FLOAT;
+            default:
+                throw new InputValidationException("Unsupported datatype.");
         }
     }
-
 }

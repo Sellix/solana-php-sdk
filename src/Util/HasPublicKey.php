@@ -1,10 +1,15 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Util;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\PublicKey;
+namespace MultipleChain\SolanaSDK\Util;
+
+use MultipleChain\SolanaSDK\PublicKey;
 
 interface HasPublicKey
 {
+    /**
+     * @return PublicKey
+     */
     public function getPublicKey(): PublicKey;
 }

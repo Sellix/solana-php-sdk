@@ -1,6 +1,8 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Borsh;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK\Borsh;
 
 trait BorshObject
 {

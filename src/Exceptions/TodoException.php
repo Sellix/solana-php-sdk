@@ -1,14 +1,25 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Exceptions;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK\Exceptions;
 
 use Exception;
 use Throwable;
 
 class TodoException extends Exception
 {
-    public function __construct($message = "", $code = 0, Throwable $previous = null)
+    /**
+     * @param string $message
+     * @param int $code
+     * @param Throwable|null $previous
+     */
+    public function __construct(string $message = "", int $code = 0, Throwable $previous = null)
     {
-        parent::__construct($message . " | Help is appreciated: https://github.com/tighten/solana-php-sdk", $code, $previous);
+        parent::__construct(
+            $message . " | Help is appreciated: https://github.com/multiplechain/solana-sdk",
+            $code,
+            $previous
+        );
     }
 }

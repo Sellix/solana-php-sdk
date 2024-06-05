@@ -1,18 +1,20 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Tests\Unit;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Keypair;
-use Tighten\SolanaPhpSdk\Message;
-use Tighten\SolanaPhpSdk\Programs\SystemProgram;
-use Tighten\SolanaPhpSdk\PublicKey;
-use Tighten\SolanaPhpSdk\Tests\TestCase;
-use Tighten\SolanaPhpSdk\Transaction;
-use Tighten\SolanaPhpSdk\TransactionInstruction;
-use Tighten\SolanaPhpSdk\Util\AccountMeta;
-use Tighten\SolanaPhpSdk\Util\Buffer;
-use Tighten\SolanaPhpSdk\Util\CompiledInstruction;
-use Tighten\SolanaPhpSdk\Util\MessageHeader;
+namespace MultipleChain\SolanaSDK\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+use MultipleChain\SolanaSDK\Keypair;
+use MultipleChain\SolanaSDK\Message;
+use MultipleChain\SolanaSDK\PublicKey;
+use MultipleChain\SolanaSDK\Transaction;
+use MultipleChain\SolanaSDK\Util\Buffer;
+use MultipleChain\SolanaSDK\Util\AccountMeta;
+use MultipleChain\SolanaSDK\Util\MessageHeader;
+use MultipleChain\SolanaSDK\Programs\SystemProgram;
+use MultipleChain\SolanaSDK\TransactionInstruction;
+use MultipleChain\SolanaSDK\Util\CompiledInstruction;
 
 class TransactionTest extends TestCase
 {
@@ -21,8 +23,12 @@ class TransactionTest extends TestCase
      * https://github.com/solana-labs/solana-web3.js/blob/master/test/transaction.test.ts
      * on October 2nd, 2021
      */
-    /** @test */
-    public function it_account_keys_are_ordered()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_account_keys_are_ordered(): void
     {
         $payer = Keypair::generate();
         $account2 = Keypair::generate();
@@ -44,8 +50,12 @@ class TransactionTest extends TestCase
         $this->assertEquals($account3->getPublicKey(), $message->accountKeys[2]);
     }
 
-    /** @test */
-    public function it_payer_is_first_account_meta()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_payer_is_first_account_meta(): void
     {
         $payer = Keypair::generate();
         $other = Keypair::generate();
@@ -70,8 +80,12 @@ class TransactionTest extends TestCase
         $this->assertEquals(1, $message->header->numReadonlyUnsignedAccounts);
     }
 
-    /** @test */
-    public function it_payer_is_writable()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_payer_is_writable(): void
     {
         $payer = Keypair::generate();
         $recentBlockhash = Keypair::generate()->getPublicKey()->toBase58();
@@ -89,8 +103,12 @@ class TransactionTest extends TestCase
         $this->assertEquals(1, $message->header->numReadonlyUnsignedAccounts);
     }
 
-    /** @test */
-    public function it_partialSign()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_partialSign(): void
     {
         $account1 = Keypair::generate();
         $account2 = Keypair::generate();
@@ -116,8 +134,12 @@ class TransactionTest extends TestCase
         $this->assertEquals($expected, $partialTransaction);
     }
 
-    /** @test */
-    public function it_dedupe_setSigners()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_dedupe_setSigners(): void
     {
         $payer = Keypair::generate();
         $duplicate1 = $payer;
@@ -151,8 +173,12 @@ class TransactionTest extends TestCase
         $this->assertEquals(1, $message->header->numReadonlyUnsignedAccounts);
     }
 
-    /** @test */
-    public function it_dedupe_sign()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_dedupe_sign(): void
     {
         $payer = Keypair::generate();
         $duplicate1 = $payer;
@@ -186,8 +212,12 @@ class TransactionTest extends TestCase
         $this->assertEquals(1, $message->header->numReadonlyUnsignedAccounts);
     }
 
-    /** @test */
-    public function it_transfer_signatures()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_transfer_signatures(): void
     {
         $account1 = Keypair::generate();
         $account2 = Keypair::generate();
@@ -206,8 +236,12 @@ class TransactionTest extends TestCase
         $this->assertEquals($orgTransaction, $newTransaction);
     }
 
-    /** @test */
-    public function it_use_nonce()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_use_nonce(): void
     {
         $account1 = Keypair::generate();
         $account2 = Keypair::generate();
@@ -217,9 +251,14 @@ class TransactionTest extends TestCase
         $this->markTestSkipped('TODO once SystemProgram::nonceAdvance is implemented.');
     }
 
-    /** @test */
-    public function it_parse_wire_format_and_serialize()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_parse_wire_format_and_serialize(): void
     {
+        // @phpcs:ignore
         $sender = Keypair::fromSeed([8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]); // Arbitrary known account
         $recentBlockhash = 'EETubP5AKHgjPAhzPAFcb8BAY1hMH639CWCFTqi3hq1k'; // Arbitrary known recentBlockhash
         $recipient = new PublicKey('J3dxNj7nDRRqRRXuEMynDG57DkZK4jYRuv3Garmb1i99'); // Arbitrary known public key
@@ -229,6 +268,7 @@ class TransactionTest extends TestCase
         $expectedTransaction->add($transfer);
         $expectedTransaction->sign($sender);
 
+        // @phpcs:ignore
         $wireTransaction = sodium_base642bin('AVuErQHaXv0SG0/PchunfxHKt8wMRfMZzqV0tkC5qO6owYxWU2v871AoWywGoFQr4z+q/7mE8lIufNl/kxj+nQ0BAAEDE5j2LG0aRXxRumpLXz29L2n8qTIWIY3ImX5Ba9F9k8r9Q5/Mtmcn8onFxt47xKj+XdXXd3C8j/FcPu7csUrz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxJrndgN4IFTxep3s6kO0ROug7bEsbx0xxuDkqEvwUusBAgIAAQwCAAAAMQAAAAAAAAA=', SODIUM_BASE64_VARIANT_ORIGINAL);
         $tx = Transaction::from($wireTransaction);
 
@@ -236,8 +276,12 @@ class TransactionTest extends TestCase
         $this->assertEquals($wireTransaction, $expectedTransaction->serialize());
     }
 
-    /** @test */
-    public function it_populate_transaction()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_populate_transaction(): void
     {
         $recentBlockhash = new PublicKey(1);
         $message = new Message(
@@ -249,7 +293,7 @@ class TransactionTest extends TestCase
                 new PublicKey(4),
                 new PublicKey(5),
             ],
-            $recentBlockhash,
+            $recentBlockhash->toBinaryString(),
             [
                 new CompiledInstruction(4, [1, 2, 3], Buffer::from(array_pad([], 5, 9))),
             ],
@@ -266,9 +310,14 @@ class TransactionTest extends TestCase
         $this->assertEquals($recentBlockhash, $transaction->recentBlockhash);
     }
 
-    /** @test */
-    public function it_serialize_unsigned_transaction()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_serialize_unsigned_transaction(): void
     {
+        // @phpcs:ignore
         $sender = Keypair::fromSeed([8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]); // Arbitrary known account
         $recentBlockhash = 'EETubP5AKHgjPAhzPAFcb8BAY1hMH639CWCFTqi3hq1k'; // Arbitrary known recentBlockhash
         $recipient = new PublicKey('J3dxNj7nDRRqRRXuEMynDG57DkZK4jYRuv3Garmb1i99'); // Arbitrary known public key
@@ -295,20 +344,26 @@ class TransactionTest extends TestCase
         // Serializing the message is allowed when signature array has null signatures
         $expectedTransaction->serializeMessage(); // no exception
 
+        // @phpcs:ignore
         $expectedSerializationWithNoSignatures = sodium_base642bin('AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEDE5j2LG0aRXxRumpLXz29L2n8qTIWIY3ImX5Ba9F9k8r9Q5/Mtmcn8onFxt47xKj+XdXXd3C8j/FcPu7csUrz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxJrndgN4IFTxep3s6kO0ROug7bEsbx0xxuDkqEvwUusBAgIAAQwCAAAAMQAAAAAAAAA=', SODIUM_BASE64_VARIANT_ORIGINAL);
         $this->assertEquals($expectedSerializationWithNoSignatures, $expectedTransaction->serialize(false));
 
         // Properly signed transaction succeeds
         $expectedTransaction->partialSign($sender);
         $this->assertCount(1, $expectedTransaction->signatures);
+        // @phpcs:ignore
         $expectedSerialization = sodium_base642bin('AVuErQHaXv0SG0/PchunfxHKt8wMRfMZzqV0tkC5qO6owYxWU2v871AoWywGoFQr4z+q/7mE8lIufNl/kxj+nQ0BAAEDE5j2LG0aRXxRumpLXz29L2n8qTIWIY3ImX5Ba9F9k8r9Q5/Mtmcn8onFxt47xKj+XdXXd3C8j/FcPu7csUrz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxJrndgN4IFTxep3s6kO0ROug7bEsbx0xxuDkqEvwUusBAgIAAQwCAAAAMQAAAAAAAAA=', SODIUM_BASE64_VARIANT_ORIGINAL);
 
         $this->assertEquals($expectedSerialization, $expectedTransaction->serialize());
         $this->assertCount(1, $expectedTransaction->signatures);
     }
 
-    /** @test */
-    public function it_externally_signed_stake_delegate()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_externally_signed_stake_delegate(): void
     {
 //        $authority = Keypair::fromSeed(array_pad([], 32, 1));
 //        $stake = new PublicKey(2);

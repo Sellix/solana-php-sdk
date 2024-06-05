@@ -1,8 +1,10 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Programs;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Program;
+namespace MultipleChain\SolanaSDK\Programs;
+
+use MultipleChain\SolanaSDK\Program;
 
 class SplTokenProgram extends Program
 {
@@ -12,7 +14,7 @@ class SplTokenProgram extends Program
      * @param string $pubKey
      * @return mixed
      */
-    public function getTokenAccountsByOwner(string $pubKey)
+    public function getTokenAccountsByOwner(string $pubKey): mixed
     {
         return $this->client->call('getTokenAccountsByOwner', [
             $pubKey,

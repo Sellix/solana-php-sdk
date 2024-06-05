@@ -1,8 +1,10 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Programs;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Program;
+namespace MultipleChain\SolanaSDK\Programs;
+
+use MultipleChain\SolanaSDK\Program;
 
 class MetaplexProgram extends Program
 {
@@ -10,9 +12,9 @@ class MetaplexProgram extends Program
 
     /**
      * @param string $pubKey
-     * @return array|mixed
+     * @return array<mixed>|mixed
      */
-    public function getProgramAccounts(string $pubKey)
+    public function getProgramAccounts(string $pubKey): mixed
     {
         $magicOffsetNumber = 326; // 🤷‍♂️
 

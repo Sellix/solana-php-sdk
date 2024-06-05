@@ -1,12 +1,11 @@
 # Solana PHP SDK
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/tightenco/solana-php-sdk.svg?style=flat-square)](https://packagist.org/packages/tightenco/solana-php-sdk)
-[![GitHub Tests Action Status](https://github.com/verze-app/solana-php-sdk/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/verze-app/solana-php-sdk/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/multiplechain/solana-sdk.svg?style=flat-square)](https://packagist.org/packages/multiplechain/solana-sdk)
+[![GitHub Tests Action Status](https://github.com/multiplechain/solana-sdk/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/multiplechain/solana-sdk/actions?query=workflow%3Arun-tests+branch%3Amain)
 
 ---
 
-:warning: **As of May 2023, this package is up for adoption again!** Feel free to ping https://github.com/neverything. Sadly we never got around to accomplish what we wanted at Verze, so we no longer work on the project and therefore this package is looking for new hands to work on it. Use at your own risk. Verze will *not* provide any support for this package as it exists right now; please don't email us expecting any support.
-
+This package has been forked to be developed at MultipleChain to provide infrastructure for Solana. We are not adding it internally to MultipleChain because MultipleChain is an interface that covers all Blockchain networks. But for those who just want to do something for Solana, we aim to make something that covers everything in Solana/Web3.js.
 ---
 
 Simple PHP SDK for Solana.
@@ -16,7 +15,7 @@ Simple PHP SDK for Solana.
 You can install the package via composer:
 
 ```bash
-composer require tightenco/solana-php-sdk
+composer require multiplechain/solana-sdk
 ```
 
 ## Usage
@@ -26,8 +25,8 @@ composer require tightenco/solana-php-sdk
 You can use the `Connection` class for convenient access to API methods. Some are defined in the code:
 
 ```php
-use Tighten\SolanaPhpSdk\Connection;
-use Tighten\SolanaPhpSdk\SolanaRpcClient;
+use MultipleChain\SolanaSDK\Connection;
+use MultipleChain\SolanaSDK\SolanaRpcClient;
 
 // Using a defined method
 $sdk = new Connection(new SolanaRpcClient(SolanaRpcClient::MAINNET_ENDPOINT));
@@ -42,7 +41,7 @@ For all the possible methods, see the [API documentation](https://docs.solana.co
 The `Connection` class is just a light convenience layer on top of the RPC client. You can, if you want, use the client directly, which allows you to work with the full `Response` object:
 
 ```php
-use Tighten\SolanaPhpSdk\SolanaRpcClient;
+use MultipleChain\SolanaSDK\SolanaRpcClient;
 
 $client = new SolanaRpcClient(SolanaRpcClient::MAINNET_ENDPOINT);
 $accountInfoResponse = $client->call('getAccountInfo', ['4fYNw3dojWmQ4dXtSGE9epjRGy9pFSx62YypT7avPYvA']);
@@ -96,7 +95,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email security@verze.app instead of using the issue tracker.
+If you discover any security related issues, please create an issue in this repository.
 
 ## Credits
 

@@ -1,8 +1,10 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Util;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\PublicKey;
+namespace MultipleChain\SolanaSDK\Util;
+
+use MultipleChain\SolanaSDK\PublicKey;
 
 class AccountMeta implements HasPublicKey
 {
@@ -10,13 +12,21 @@ class AccountMeta implements HasPublicKey
     public bool $isSigner;
     public bool $isWritable;
 
-    public function __construct($publicKey, $isSigner, $isWritable)
+    /**
+     * @param PublicKey $publicKey
+     * @param bool $isSigner
+     * @param bool $isWritable
+     */
+    public function __construct(PublicKey $publicKey, bool $isSigner, bool $isWritable)
     {
         $this->publicKey = $publicKey;
         $this->isSigner = $isSigner;
         $this->isWritable = $isWritable;
     }
 
+    /**
+     * @return PublicKey
+     */
     public function getPublicKey(): PublicKey
     {
         return $this->publicKey;

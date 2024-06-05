@@ -1,12 +1,14 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\InputValidationException;
-use Tighten\SolanaPhpSdk\Util\Buffer;
-use Tighten\SolanaPhpSdk\Util\CompiledInstruction;
-use Tighten\SolanaPhpSdk\Util\MessageHeader;
-use Tighten\SolanaPhpSdk\Util\ShortVec;
+namespace MultipleChain\SolanaSDK;
+
+use MultipleChain\SolanaSDK\Util\Buffer;
+use MultipleChain\SolanaSDK\Util\ShortVec;
+use MultipleChain\SolanaSDK\Util\MessageHeader;
+use MultipleChain\SolanaSDK\Util\CompiledInstruction;
+use MultipleChain\SolanaSDK\Exceptions\InputValidationException;
 
 class Message
 {
@@ -22,9 +24,10 @@ class Message
     public array $instructions;
 
     /**
-     * int to PublicKey: https://github.com/solana-labs/solana-web3.js/blob/966d7c653198de193f607cdfe19a161420408df2/src/message.ts
+     * int to PublicKey:
+     * https://github.com/solana-labs/solana-web3.js/blob/966d7c653198de193f607cdfe19a161420408df2/src/message.ts
      *
-     * @var array
+     * @var array<PublicKey>
      */
     private array $indexToProgramIds;
 
@@ -39,8 +42,7 @@ class Message
         array $accountKeys,
         string $recentBlockhash,
         array $instructions
-    )
-    {
+    ) {
         $this->header = $header;
         $this->accountKeys = array_map(function (string $accountKey) {
             return new PublicKey($accountKey);
@@ -71,7 +73,10 @@ class Message
     public function isAccountWritable(int $index): bool
     {
         return $index < ($this->header->numRequiredSignature - $this->header->numReadonlySignedAccounts)
-            || ($index >= $this->header->numRequiredSignature && $index < sizeof($this->accountKeys) - $this->header->numReadonlyUnsignedAccounts);
+            || (
+                $index >= $this->header->numRequiredSignature
+                && $index < sizeof($this->accountKeys) - $this->header->numReadonlyUnsignedAccounts
+            );
     }
 
     /**
@@ -92,7 +97,7 @@ class Message
     }
 
     /**
-     * @return array
+     * @return array<PublicKey>
      */
     public function nonProgramIds(): array
     {
@@ -116,11 +121,11 @@ class Message
             $out->push($this->encodeInstruction($instruction));
         }
 
-        return $out;
+        return $out->toString();
     }
 
     /**
-     * @return array
+     * @return array<int>
      */
     protected function encodeMessage(): array
     {
@@ -144,11 +149,16 @@ class Message
         ];
     }
 
+    /**
+     * @param CompiledInstruction $instruction
+     * @return array<int>
+     */
     protected function encodeInstruction(CompiledInstruction $instruction): array
     {
         $data = $instruction->data;
 
-        $accounts = $instruction->accounts;;
+        $accounts = $instruction->accounts;
+        ;
 
         return [
             // uint8
@@ -163,15 +173,14 @@ class Message
     }
 
     /**
-     * @param array|Buffer $rawMessage
+     * @param array<mixed>|Buffer $rawMessage
      * @return Message
      */
-    public static function from($rawMessage): Message
+    public static function from(array|Buffer $rawMessage): Message
     {
         $rawMessage = Buffer::from($rawMessage);
 
-        $HEADER_OFFSET = 3;
-        if (sizeof($rawMessage) < $HEADER_OFFSET) {
+        if (sizeof($rawMessage) < 3 /** header offset */) {
             throw new InputValidationException('Byte representation of message is missing message header.');
         }
 
@@ -184,7 +193,7 @@ class Message
         list($accountsLength, $accountsOffset) = ShortVec::decodeLength($rawMessage);
         for ($i = 0; $i < $accountsLength; $i++) {
             $keyBytes = $rawMessage->slice($accountsOffset, PublicKey::LENGTH);
-            array_push($accountKeys, (new PublicKey($keyBytes))->toBase58());
+            array_push($accountKeys, (new PublicKey($keyBytes->toString()))->toBase58());
             $accountsOffset += PublicKey::LENGTH;
         }
         $rawMessage = $rawMessage->slice($accountsOffset);

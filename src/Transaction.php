@@ -1,19 +1,21 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\GenericException;
-use Tighten\SolanaPhpSdk\Exceptions\InputValidationException;
-use Tighten\SolanaPhpSdk\Util\AccountMeta;
-use Tighten\SolanaPhpSdk\Util\Buffer;
-use Tighten\SolanaPhpSdk\Util\CompiledInstruction;
-use Tighten\SolanaPhpSdk\Util\HasPublicKey;
-use Tighten\SolanaPhpSdk\Util\HasSecretKey;
-use Tighten\SolanaPhpSdk\Util\MessageHeader;
-use Tighten\SolanaPhpSdk\Util\NonceInformation;
-use Tighten\SolanaPhpSdk\Util\ShortVec;
-use Tighten\SolanaPhpSdk\Util\SignaturePubkeyPair;
-use Tighten\SolanaPhpSdk\Util\Signer;
+namespace MultipleChain\SolanaSDK;
+
+use MultipleChain\SolanaSDK\Util\Signer;
+use MultipleChain\SolanaSDK\Util\Buffer;
+use MultipleChain\SolanaSDK\Util\ShortVec;
+use MultipleChain\SolanaSDK\Util\AccountMeta;
+use MultipleChain\SolanaSDK\Util\HasPublicKey;
+use MultipleChain\SolanaSDK\Util\HasSecretKey;
+use MultipleChain\SolanaSDK\Util\MessageHeader;
+use MultipleChain\SolanaSDK\Util\NonceInformation;
+use MultipleChain\SolanaSDK\Util\SignaturePubkeyPair;
+use MultipleChain\SolanaSDK\Util\CompiledInstruction;
+use MultipleChain\SolanaSDK\Exceptions\GenericException;
+use MultipleChain\SolanaSDK\Exceptions\InputValidationException;
 
 class Transaction
 {
@@ -23,41 +25,62 @@ class Transaction
      * Signatures are 64 bytes in length
      *
      * Buffer.alloc(64).fill(0);
+     * @var array<int>
      */
-    const DEFAULT_SIGNATURE = [
+    public const DEFAULT_SIGNATURE = [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
 
     /**
-     *
+     * @var int
      */
-    const SIGNATURE_LENGTH = 64;
+    public const SIGNATURE_LENGTH = 64;
 
     /**
-     *
+     * @var int
      */
-    const PACKET_DATA_SIZE = 1280 - 40 - 8;
+    public const PACKET_DATA_SIZE = 1280 - 40 - 8;
+
+    /**
+     * @var string|null
+     */
+    public string|null $recentBlockhash;
+
+    /**
+     * @var NonceInformation|null
+     */
+    public NonceInformation|null $nonceInformation;
+
+    /**
+     * @var PublicKey|null
+     */
+    public PublicKey|null $feePayer;
 
     /**
      * @var array<SignaturePubkeyPair>
      */
     public array $signatures;
-    public ?string $recentBlockhash;
-    public ?NonceInformation $nonceInformation;
-    public ?PublicKey $feePayer;
+
     /**
      * @var array<TransactionInstruction>
      */
     public array $instructions = [];
 
+    /**
+     * Transaction constructor.
+     *
+     * @param string|null $recentBlockhash
+     * @param NonceInformation|null $nonceInformation
+     * @param PublicKey|null $feePayer
+     * @param array<SignaturePubkeyPair> $signatures
+     */
     public function __construct(
         ?string $recentBlockhash = null,
         ?NonceInformation $nonceInformation = null,
         ?PublicKey $feePayer = null,
         ?array $signatures = []
-    )
-    {
+    ) {
         $this->recentBlockhash = $recentBlockhash;
         $this->nonceInformation = $nonceInformation;
         $this->feePayer = $feePayer;
@@ -79,11 +102,11 @@ class Transaction
     }
 
     /**
-     * @param ...$items
-     * @return $this
+     * @param mixed ...$items
+     * @return Transaction
      * @throws GenericException
      */
-    public function add(...$items): Transaction
+    public function add(mixed ...$items): Transaction
     {
         foreach ($items as $item) {
             if ($item instanceof TransactionInstruction) {
@@ -91,7 +114,9 @@ class Transaction
             } elseif ($item instanceof Transaction) {
                 array_push($this->instructions, ...$item->instructions);
             } else {
-                throw new InputValidationException("Invalid parameter to add(). Only Transaction and TransactionInstruction are allows.");
+                throw new InputValidationException(
+                    "Invalid parameter to add(). Only Transaction and TransactionInstruction are allows."
+                );
             }
         }
 
@@ -183,7 +208,8 @@ class Transaction
             $uniqueIndex = $this->arraySearchAccountMetaForPublicKey($uniqueMetas, $eachPublicKey);
 
             if ($uniqueIndex > -1) {
-                $uniqueMetas[$uniqueIndex]->isWritable = $uniqueMetas[$uniqueIndex]->isWritable || $accountMeta->isWritable;
+                $result = $uniqueMetas[$uniqueIndex]->isWritable || $accountMeta->isWritable;
+                $uniqueMetas[$uniqueIndex]->isWritable = $result;
             } else {
                 array_push($uniqueMetas, $accountMeta);
             }
@@ -241,7 +267,7 @@ class Transaction
 
         // Initialize signature array, if needed
         if (! $this->signatures) {
-            $this->signatures = array_map(function($signedKey) {
+            $this->signatures = array_map(function ($signedKey) {
                 return new SignaturePubkeyPair(new PublicKey($signedKey), null);
             }, $signedKeys);
         }
@@ -276,8 +302,9 @@ class Transaction
     }
 
     /**
-     * The Python library takes a little different approach to their implementation of Transaction. It seems simpler to me
-     * and does not involve the compile method from the JS library. An early implementation of this class used this in a
+     * The Python library takes a little different approach to their implementation of Transaction.
+     * It seems simpler to me and does not involve the compile method from the JS library.
+     * An early implementation of this class used this in a
      * 1 to 1 port of the Javascript library, however as I iterated I went away from that.
      *
      * TODO: Keep this around for a few weeks and delete once we are sure all the kinks with the current implementation
@@ -304,6 +331,7 @@ class Transaction
 
     /**
      * Get a buffer of the Transaction data that need to be covered by signatures
+     * @return string
      */
     public function serializeMessage(): string
     {
@@ -320,13 +348,14 @@ class Transaction
      * specified and it can be set in the Transaction constructor or with the
      * `feePayer` property.
      *
-     * @param array<PublicKey> $signers
+     * @param array<PublicKey> ...$signers
+     * @return void
      */
-    public function setSigners(...$signers)
+    public function setSigners(array ...$signers): void
     {
         $uniqueSigners = $this->arrayUnique($signers);
 
-        $this->signatures = array_map(function(PublicKey $signer) {
+        $this->signatures = array_map(function (PublicKey $signer) {
             return new SignaturePubkeyPair($signer, null);
         }, $uniqueSigners);
     }
@@ -337,8 +366,9 @@ class Transaction
      * previously provided to `signPartial`
      *
      * @param Keypair $signer
+     * @return void
      */
-    public function addSigner(Keypair $signer)
+    public function addSigner(Keypair $signer): void
     {
         $message = $this->compileMessage();
         $signData = $message->serialize();
@@ -360,9 +390,10 @@ class Transaction
      *
      * The Transaction must be assigned a valid `recentBlockhash` before invoking this method
      *
-     * @param array<Signer|Keypair> $signers
+     * @param array<Signer|Keypair> ...$signers
+     * @return void
      */
-    public function sign(...$signers)
+    public function sign(array ...$signers): void
     {
         $this->partialSign(...$signers);
     }
@@ -374,9 +405,10 @@ class Transaction
      *
      * All the caveats from the `sign` method apply to `partialSign`
      *
-     * @param array<Signer|Keypair> $signers
+     * @param array<Signer|Keypair> ...$signers
+     * @return void
      */
-    public function partialSign(...$signers)
+    public function partialSign(array ...$signers): void
     {
         // Dedupe signers
         $uniqueSigners = $this->arrayUnique($signers);
@@ -391,7 +423,7 @@ class Transaction
         foreach ($uniqueSigners as $signer) {
             if ($signer instanceof Keypair) {
                 $signature = sodium_crypto_sign_detached($signData, $this->toSecretKey($signer));
-                if (strlen($signature) != self::SIGNATURE_LENGTH) {
+                if (self::SIGNATURE_LENGTH != strlen($signature)) {
                     throw new InputValidationException('Signature has invalid length.');
                 }
                 $this->_addSignature($this->toPublicKey($signer), $signature);
@@ -406,11 +438,12 @@ class Transaction
      *
      * @param PublicKey $publicKey
      * @param string $signature
+     * @return void
      * @throws GenericException
      */
-    public function addSignature(PublicKey $publicKey, string $signature)
+    public function addSignature(PublicKey $publicKey, string $signature): void
     {
-        if (strlen($signature) !== self::SIGNATURE_LENGTH) {
+        if (self::SIGNATURE_LENGTH !== strlen($signature)) {
             throw new InputValidationException('Signature has invalid length.');
         }
 
@@ -421,12 +454,14 @@ class Transaction
     /**
      * @param PublicKey $publicKey
      * @param string $signature
+     * @return void
      */
-    protected function _addSignature(PublicKey $publicKey, string $signature)
+    // @phpcs:ignore
+    protected function _addSignature(PublicKey $publicKey, string $signature): void
     {
         $indexOfPublicKey = $this->arraySearchAccountMetaForPublicKey($this->signatures, $publicKey);
 
-        if ($indexOfPublicKey === -1) {
+        if (-1 === $indexOfPublicKey) {
             throw new InputValidationException("Unknown signer: {$publicKey->toBase58()}");
         }
 
@@ -446,6 +481,7 @@ class Transaction
      * @param bool $requireAllSignatures
      * @return bool
      */
+    // @phpcs:ignore
     protected function _verifySignature(string $signData, bool $requireAllSignatures): bool
     {
         foreach ($this->signatures as $signature) {
@@ -454,7 +490,13 @@ class Transaction
                     return false;
                 }
             } else {
-                if (! sodium_crypto_sign_verify_detached($signature->signature, $signData, $signature->getPublicKey()->toBinaryString())) {
+                if (
+                    !sodium_crypto_sign_verify_detached(
+                        $signature->signature,
+                        $signData,
+                        $signature->getPublicKey()->toBinaryString()
+                    )
+                ) {
                     return false;
                 }
             }
@@ -468,8 +510,9 @@ class Transaction
      *
      * @param bool|null $requireAllSignature
      * @param bool|null $verifySignatures
+     * @return string
      */
-    public function serialize(bool $requireAllSignature = true, bool $verifySignatures = true)
+    public function serialize(bool $requireAllSignature = true, bool $verifySignatures = true): string
     {
         $signData = $this->serializeMessage();
 
@@ -484,6 +527,7 @@ class Transaction
      * @param string $signData
      * @return string
      */
+    // @phpcs:ignore
     protected function _serialize(string $signData): string
     {
         if (sizeof($this->signatures) >= self::SIGNATURE_LENGTH * 4) {
@@ -499,7 +543,7 @@ class Transaction
 
         // Encode signatures
         foreach ($this->signatures as $signature) {
-            if ($signature->signature && strlen($signature->signature) != self::SIGNATURE_LENGTH) {
+            if ($signature->signature && self::SIGNATURE_LENGTH != strlen($signature->signature)) {
                 throw new GenericException("signature has invalid length: {$signature->signature}");
             }
 
@@ -519,16 +563,16 @@ class Transaction
             throw new GenericException("transaction too large: {$actualSize} > {$maxSize}");
         }
 
-        return $wireTransaction;
+        return $wireTransaction->toString();
     }
 
     /**
      * Parse a wire transaction into a Transaction object.
      *
-     * @param $buffer
+     * @param mixed $buffer
      * @return Transaction
      */
-    public static function from($buffer): Transaction
+    public static function from(mixed $buffer): Transaction
     {
         $buffer = Buffer::from($buffer);
 
@@ -573,7 +617,7 @@ class Transaction
         foreach ($message->instructions as $instruction) {
             $keys = array_map(function (int $accountIndex) use ($transaction, $message) {
                 $publicKey = $message->accountKeys[$accountIndex];
-                $isSigner = static::arraySearchAccountMetaForPublicKey($transaction->signatures, $publicKey) !== -1
+                $isSigner = -1 !== static::arraySearchAccountMetaForPublicKey($transaction->signatures, $publicKey)
                     || $message->isAccountSigner($accountIndex);
                 $isWritable = $message->isAccountWritable($accountIndex);
                 return new AccountMeta($publicKey, $isSigner, $isWritable);
@@ -594,8 +638,10 @@ class Transaction
      * @param PublicKey|SignaturePubkeyPair|AccountMeta|string $needle
      * @return int|string
      */
-    static protected function arraySearchAccountMetaForPublicKey(array $haystack, $needle)
-    {
+    protected static function arraySearchAccountMetaForPublicKey(
+        array $haystack,
+        PublicKey|SignaturePubkeyPair|AccountMeta|string $needle
+    ): int|string {
         $publicKeyToSearchFor = static::toPublicKey($needle);
 
         foreach ($haystack as $i => $item) {
@@ -608,17 +654,17 @@ class Transaction
     }
 
     /**
-     * @param array $haystack
-     * @return array
+     * @param array<mixed> $haystack
+     * @return array<mixed>
      * @throws GenericException
      */
-    static protected function arrayUnique(array $haystack)
+    protected static function arrayUnique(array $haystack): array
     {
         $unique = [];
         foreach ($haystack as $item) {
             $indexOfSigner = static::arraySearchAccountMetaForPublicKey($unique, $item);
 
-            if ($indexOfSigner === -1) {
+            if (-1 === $indexOfSigner) {
                 array_push($unique, $item);
             }
         }
@@ -627,11 +673,11 @@ class Transaction
     }
 
     /**
-     * @param $source
+     * @param mixed $source
      * @return PublicKey
      * @throws GenericException
      */
-    static protected function toPublicKey($source): PublicKey
+    protected static function toPublicKey(mixed $source): PublicKey
     {
         if ($source instanceof HasPublicKey) {
             return $source->getPublicKey();
@@ -645,14 +691,14 @@ class Transaction
     /**
      * Pulls out the secret key and casts it to a string.
      *
-     * @param $source
+     * @param mixed $source
      * @return string
      * @throws InputValidationException
      */
-    protected function toSecretKey($source): string
+    protected function toSecretKey(mixed $source): string
     {
         if ($source instanceof HasSecretKey) {
-            return $source->getSecretKey();
+            return $source->getSecretKey()->toString();
         } else {
             throw new InputValidationException('Unsupported input: ' . get_class($source));
         }

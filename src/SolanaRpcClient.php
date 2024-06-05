@@ -1,12 +1,14 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk;
+declare(strict_types=1);
 
-use Illuminate\Http\Client\Factory as HttpFactory;
+namespace MultipleChain\SolanaSDK;
+
 use Illuminate\Http\Client\Response;
-use Tighten\SolanaPhpSdk\Exceptions\GenericException;
-use Tighten\SolanaPhpSdk\Exceptions\InvalidIdResponseException;
-use Tighten\SolanaPhpSdk\Exceptions\MethodNotFoundException;
+use Illuminate\Http\Client\Factory as HttpFactory;
+use MultipleChain\SolanaSDK\Exceptions\GenericException;
+use MultipleChain\SolanaSDK\Exceptions\MethodNotFoundException;
+use MultipleChain\SolanaSDK\Exceptions\InvalidIdResponseException;
 
 /**
  * @see https://docs.solana.com/developing/clients/jsonrpc-api
@@ -35,8 +37,15 @@ class SolanaRpcClient
     // Reserved for implementation-defined server-errors.
     // -32000 to -32099 is server error - no const.
 
-    protected $endpoint;
-    protected $randomKey;
+    /**
+     * @var string
+     */
+    protected string $endpoint;
+
+    /**
+     * @var int
+     */
+    protected int $randomKey;
 
     /**
      * @param string $endpoint
@@ -50,14 +59,14 @@ class SolanaRpcClient
 
     /**
      * @param string $method
-     * @param array $params
-     * @param array $headers
+     * @param array<mixed> $params
+     * @param array<mixed> $headers
      * @return mixed
      * @throws GenericException
      * @throws InvalidIdResponseException
      * @throws MethodNotFoundException
      */
-    public function call(string $method, array $params = [], array $headers = [])
+    public function call(string $method, array $params = [], array $headers = []): mixed
     {
         $response = (new HttpFactory())->acceptJson()->withHeaders($headers)->post(
             $this->endpoint,
@@ -71,8 +80,8 @@ class SolanaRpcClient
 
     /**
      * @param string $method
-     * @param array $params
-     * @return array
+     * @param array<mixed> $params
+     * @return array<mixed>
      */
     public function buildRpc(string $method, array $params): array
     {
@@ -87,7 +96,8 @@ class SolanaRpcClient
     /**
      * @param Response $response
      * @param string $method
-     * @param array $params
+     * @param array<mixed> $params
+     * @return void
      * @throws GenericException
      * @throws InvalidIdResponseException
      * @throws MethodNotFoundException
@@ -99,7 +109,7 @@ class SolanaRpcClient
         }
 
         if (isset($response['error'])) {
-            if ($response['error']['code'] === self::ERROR_CODE_METHOD_NOT_FOUND) {
+            if (self::ERROR_CODE_METHOD_NOT_FOUND === $response['error']['code']) {
                 throw new MethodNotFoundException("API Error: Method {$method} not found.");
             } else {
                 throw new GenericException($response['error']['message']);

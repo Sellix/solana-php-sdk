@@ -1,54 +1,92 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Tests\Unit;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Borsh\Borsh;
-use Tighten\SolanaPhpSdk\Borsh\BorshObject;
-use Tighten\SolanaPhpSdk\Tests\TestCase;
+namespace MultipleChain\SolanaSDK\Tests\Unit;
 
-class Test {
+use PHPUnit\Framework\TestCase;
+use MultipleChain\SolanaSDK\Borsh\Borsh;
+use MultipleChain\SolanaSDK\Borsh\BorshObject;
+
+class Test
+{
     use BorshObject;
 
-    public $x;
-    public $y;
-    public $z;
-    public $a;
-    public $b;
-    public $c;
-    public $q;
+    public mixed $x;
+    public mixed $y;
+    public mixed $z;
+    public mixed $a;
+    public mixed $b;
+    public mixed $c;
+    public mixed $q;
 }
 
-class TestWithPrivateVariable {
+// @phpcs:ignore
+class TestWithPrivateVariable
+{
     use BorshObject;
 
-    private $m;
+    private mixed $m;
 
-    public function setM($m) {$this->m = $m;}
-    public function getM() {return $this->m;}
-}
-
-class TestWithConstructorParameters {
-    use BorshObject;
-
-    private $m;
-
-    public function __construct($m)
+    /**
+     * @param mixed $m
+     * @return void
+     */
+    public function setM(mixed $m): void
     {
         $this->m = $m;
     }
 
-    public function getM() {return $this->m;}
+    /**
+     * @return mixed
+     */
+    public function getM(): mixed
+    {
+        return $this->m;
+    }
+}
 
-    public static function borshConstructor()
+// @phpcs:ignore
+class TestWithConstructorParameters
+{
+    use BorshObject;
+
+    private mixed $m;
+
+    /**
+     * @param mixed $m
+     */
+    public function __construct(mixed $m)
+    {
+        $this->m = $m;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getM(): mixed
+    {
+        return $this->m;
+    }
+
+    /**
+     * @return static
+     */
+    public static function borshConstructor(): static
     {
         return new static(null);
     }
 }
 
+// @phpcs:ignore
 class BorshTest extends TestCase
 {
-    /** @test */
-    public function it_serialize_object()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_serialize_object(): void
     {
         $value = new Test();
         $value->x = 255;
@@ -87,8 +125,12 @@ class BorshTest extends TestCase
         $this->assertEquals([1, 2, 3], $newValue->q);
     }
 
-    /** @test */
-    public function it_serialize_optional_field()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_serialize_optional_field(): void
     {
         $schema = [
             Test::class => [
@@ -115,8 +157,12 @@ class BorshTest extends TestCase
         $this->assertNull($newValue->x);
     }
 
-    /** @test */
-    public function it_serialize_deserialize_fixed_array()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_serialize_deserialize_fixed_array(): void
     {
         $schema = [
             Test::class => [
@@ -137,8 +183,12 @@ class BorshTest extends TestCase
         $this->assertEquals(['hello', 'world'], $newValue->x);
     }
 
-    /** @test */
-    public function it_serialize_deserialize_invisible_properties()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_serialize_deserialize_invisible_properties(): void
     {
         $value = new TestWithPrivateVariable();
         $value->setM(255);
@@ -159,8 +209,12 @@ class BorshTest extends TestCase
         $this->assertEquals(255, $newValue->getM());
     }
 
-    /** @test */
-    public function it_serialize_deserialize_handles_constructor_with_parameters()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_serialize_deserialize_handles_constructor_with_parameters(): void
     {
         $value = new TestWithConstructorParameters(255);
 

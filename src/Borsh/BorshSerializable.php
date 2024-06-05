@@ -1,14 +1,16 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Borsh;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK\Borsh;
 
 trait BorshSerializable
 {
     /**
-     * @param $name
+     * @param mixed $name
      * @return mixed
      */
-    public function __get($name)
+    public function __get(mixed $name): mixed
     {
         return $this->{$name};
     }

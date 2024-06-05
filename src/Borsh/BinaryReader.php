@@ -1,17 +1,21 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Borsh;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\TodoException;
-use Tighten\SolanaPhpSdk\Util\Buffer;
-use Tighten\SolanaPhpSdk\PublicKey;
+namespace MultipleChain\SolanaSDK\Borsh;
+
 use Closure;
+use MultipleChain\SolanaSDK\PublicKey;
+use MultipleChain\SolanaSDK\Util\Buffer;
 
 class BinaryReader
 {
     protected Buffer $buffer;
     protected int $offset;
 
+    /**
+     * @param Buffer $buffer
+     */
     public function __construct(Buffer $buffer)
     {
         $this->buffer = $buffer;
@@ -83,10 +87,11 @@ class BinaryReader
     }
 
     /**
-     * @param $length
+     * @param int $length
+     * @param string|null $datatype
      * @return int
      */
-    protected function readUnsignedInt($length, $datatype): int
+    protected function readUnsignedInt(int $length, ?string $datatype): int
     {
         $value = $this->buffer->slice($this->offset, $length, $datatype, false)->value();
         $this->offset += $length;
@@ -94,10 +99,11 @@ class BinaryReader
     }
 
     /**
-     * @param $length
+     * @param int $length
+     * @param string|null $datatype
      * @return int
      */
-    protected function readSignedInt($length, $datatype): int
+    protected function readSignedInt(int $length, ?string $datatype): int
     {
         $value = $this->buffer->slice($this->offset, $length, $datatype, true)->value();
         $this->offset += $length;
@@ -125,10 +131,10 @@ class BinaryReader
     }
 
     /**
-     * @return string
+     * @return Buffer
      * @throws BorshException
      */
-    public function readString(): string
+    public function readString(): Buffer
     {
         $length = $this->readU32();
         return $this->readBuffer($length);
@@ -136,25 +142,32 @@ class BinaryReader
 
     /**
      * @param int $length
-     * @return array
+     * @return array<int>
      */
     public function readFixedArray(int $length): array
     {
         return $this->readBuffer($length)->toArray();
     }
 
+    /**
+     * @return PublicKey
+     */
     public function readPubKey(): PublicKey
     {
         return new PublicKey($this->readFixedArray(32));
     }
 
+    /**
+     * @return string
+     */
     public function readPubKeyAsString(): string
     {
         return $this->readPubKey()->toBase58();
     }
 
     /**
-     * @return array
+     * @param Closure $readEachItem
+     * @return array<mixed>
      */
     public function readArray(Closure $readEachItem): array
     {
@@ -167,11 +180,11 @@ class BinaryReader
     }
 
     /**
-     * @param $length
+     * @param mixed $length
      * @return Buffer
      * @throws BorshException
      */
-    protected function readBuffer($length): Buffer
+    protected function readBuffer(mixed $length): Buffer
     {
         if ($this->offset + $length > sizeof($this->buffer)) {
             throw new BorshException("Expected buffer length {$length} isn't within bounds");
@@ -181,5 +194,4 @@ class BinaryReader
         $this->offset += $length;
         return $buffer;
     }
-
 }

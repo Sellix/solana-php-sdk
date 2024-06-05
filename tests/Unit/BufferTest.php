@@ -1,18 +1,22 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Tests\Unit;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Account;
-use Tighten\SolanaPhpSdk\Keypair;
-use Tighten\SolanaPhpSdk\Programs\SystemProgram;
-use Tighten\SolanaPhpSdk\PublicKey;
-use Tighten\SolanaPhpSdk\Tests\TestCase;
-use Tighten\SolanaPhpSdk\Util\Buffer;
+namespace MultipleChain\SolanaSDK\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+use MultipleChain\SolanaSDK\Keypair;
+use MultipleChain\SolanaSDK\Util\Buffer;
+use MultipleChain\SolanaSDK\Programs\SystemProgram;
 
 class BufferTest extends TestCase
 {
-    /** @test */
-    public function it_buffer_push_fixed_length()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_buffer_push_fixed_length(): void
     {
         $lamports = 4;
         $space = 6;
@@ -25,19 +29,18 @@ class BufferTest extends TestCase
             ...unpack("C*", pack("P", $lamports)),
             // int64
             ...unpack("C*", pack("P", $space)),
-            //
             ...$programId->toBytes(),
         ];
 
         $bufferable = Buffer::from()
             ->push(
-                Buffer::from(SystemProgram::PROGRAM_INDEX_CREATE_ACCOUNT,Buffer::TYPE_INT, false)
+                Buffer::from(SystemProgram::PROGRAM_INDEX_CREATE_ACCOUNT, Buffer::TYPE_INT, false)
             )
             ->push(
-                Buffer::from($lamports,Buffer::TYPE_LONG, false)
+                Buffer::from($lamports, Buffer::TYPE_LONG, false)
             )
             ->push(
-                Buffer::from($space,Buffer::TYPE_LONG, false)
+                Buffer::from($space, Buffer::TYPE_LONG, false)
             )
             ->push($programId)
         ;

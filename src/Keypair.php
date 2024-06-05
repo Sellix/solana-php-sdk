@@ -1,27 +1,40 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK;
 
 use SodiumException;
-use Tighten\SolanaPhpSdk\Util\Buffer;
-use Tighten\SolanaPhpSdk\Util\HasPublicKey;
-use Tighten\SolanaPhpSdk\Util\HasSecretKey;
+use MultipleChain\SolanaSDK\Util\Buffer;
+use MultipleChain\SolanaSDK\Util\HasPublicKey;
+use MultipleChain\SolanaSDK\Util\HasSecretKey;
 
 /**
  * An account keypair used for signing transactions.
  */
 class Keypair implements HasPublicKey, HasSecretKey
 {
+    /**
+     * The public key for this keypair
+     *
+     * @var Buffer
+     */
     public Buffer $publicKey;
+
+    /**
+     * The raw secret key for this keypair
+     *
+     * @var Buffer
+     */
     public Buffer $secretKey;
 
     /**
-     * @param array|string $publicKey
-     * @param array|string $secretKey
+     * @param array<mixed>|string $publicKey
+     * @param array<mixed>|string $secretKey
      */
-    public function __construct($publicKey = null, $secretKey = null)
+    public function __construct(array|string $publicKey = null, array|string $secretKey = null)
     {
-        if ($publicKey == null && $secretKey == null) {
+        if (null == $publicKey && null == $secretKey) {
             $keypair = sodium_crypto_sign_keypair();
 
             $publicKey = sodium_crypto_sign_publickey($keypair);
@@ -63,10 +76,10 @@ class Keypair implements HasPublicKey, HasSecretKey
      * generated secret key. Generating keypairs from a random seed should be done
      * with the {@link Keypair.fromSeed} method.
      *
-     * @param $secretKey
+     * @param mixed $secretKey
      * @return Keypair
      */
-    static public function fromSecretKey($secretKey): Keypair
+    public static function fromSecretKey(mixed $secretKey): Keypair
     {
         $secretKey = Buffer::from($secretKey)->toString();
 
@@ -81,11 +94,11 @@ class Keypair implements HasPublicKey, HasSecretKey
     /**
      * Generate a keypair from a 32 byte seed.
      *
-     * @param string|array $seed
+     * @param string|array<mixed> $seed
      * @return Keypair
      * @throws SodiumException
      */
-    static public function fromSeed($seed): Keypair
+    public static function fromSeed(string|array $seed): Keypair
     {
         $seed = Buffer::from($seed)->toString();
 
@@ -101,7 +114,7 @@ class Keypair implements HasPublicKey, HasSecretKey
      */
     public function getPublicKey(): PublicKey
     {
-        return new PublicKey($this->publicKey);
+        return new PublicKey($this->publicKey->toString());
     }
 
     /**

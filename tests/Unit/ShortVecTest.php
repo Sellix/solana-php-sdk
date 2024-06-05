@@ -1,14 +1,20 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Tests\Unit;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Tests\TestCase;
-use Tighten\SolanaPhpSdk\Util\ShortVec;
+namespace MultipleChain\SolanaSDK\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+use MultipleChain\SolanaSDK\Util\ShortVec;
 
 class ShortVecTest extends TestCase
 {
-    /** @test */
-    public function it_decodeLength()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_decodeLength(): void
     {
         $this->checkDecodedArray([], 0, 0);
         $this->checkDecodedArray([5], 1, 5);
@@ -21,8 +27,12 @@ class ShortVecTest extends TestCase
         $this->checkDecodedArray([0x80, 0x80, 0x80, 0x01], 4, 0x200000);
     }
 
-    /** @test */
-    public function it_encodeLength()
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
+    public function it_encodeLength(): void
     {
         $array = [];
         $prevLength = 0;
@@ -69,10 +79,12 @@ class ShortVecTest extends TestCase
     }
 
     /**
-     * @param array $array
+     * @param array<mixed> $array
+     * @param int $expectedLength
      * @param int $expectedValue
+     * @return void
      */
-    protected function checkDecodedArray(array $array, int $expectedLength, int $expectedValue)
+    protected function checkDecodedArray(array $array, int $expectedLength, int $expectedValue): void
     {
         list($value, $length) = ShortVec::decodeLength($array);
         $this->assertEquals($expectedValue, $value);
@@ -80,12 +92,13 @@ class ShortVecTest extends TestCase
     }
 
     /**
-     * @param array $array
+     * @param array<mixed> $array
      * @param int $length
      * @param int $prevLength
-     * @param array $expectedArray
+     * @param array<mixed> $expectedArray
+     * @return void
      */
-    protected function checkEncodedArray(array &$array, int $length, int $prevLength, array $expectedArray)
+    protected function checkEncodedArray(array &$array, int $length, int $prevLength, array $expectedArray): void
     {
         $this->assertEquals(sizeof($array), $prevLength);
         $actual = ShortVec::encodeLength($length);

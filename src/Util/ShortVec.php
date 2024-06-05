@@ -1,14 +1,16 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Util;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK\Util;
 
 class ShortVec
 {
     /**
-     * @param $buffer
-     * @return array list($length, $size)
+     * @param mixed $buffer
+     * @return array<int> list($length, $size)
      */
-    public static function decodeLength($buffer): array
+    public static function decodeLength(mixed $buffer): array
     {
         $buffer = Buffer::from($buffer)->toArray();
 
@@ -18,29 +20,33 @@ class ShortVec
             $elem = $buffer[$size];
             $len |= ($elem & 0x7F) << ($size * 7);
             $size++;
-            if (($elem & 0x80) == 0) {
+            if (0 == ($elem & 0x80)) {
                 break;
             }
         }
         return [$len, $size];
     }
 
+    /**
+     * @param int $length
+     * @return array<int>
+     */
     public static function encodeLength(int $length): array
     {
-        $elems = [];
-        $rem_len = $length;
+        $elemList = [];
+        $remLen = $length;
 
         for (;;) {
-            $elem = $rem_len & 0x7f;
-            $rem_len >>= 7;
-            if (! $rem_len) {
-                array_push($elems, $elem);
+            $elem = $remLen & 0x7f;
+            $remLen >>= 7;
+            if (! $remLen) {
+                array_push($elemList, $elem);
                 break;
             }
             $elem |= 0x80;
-            array_push($elems, $elem);
+            array_push($elemList, $elem);
         }
 
-        return $elems;
+        return $elemList;
     }
 }

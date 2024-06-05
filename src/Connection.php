@@ -1,17 +1,21 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\AccountNotFoundException;
-use Tighten\SolanaPhpSdk\Util\Commitment;
+namespace MultipleChain\SolanaSDK;
+
+use Illuminate\Http\Client\Response;
+use MultipleChain\SolanaSDK\Util\Commitment;
+use MultipleChain\SolanaSDK\Exceptions\AccountNotFoundException;
 
 class Connection extends Program
 {
     /**
      * @param Commitment|null $commitment
-     * @return array
+     * @return array<mixed>
      */
-    public function getLatestBlockhash(?Commitment $commitment = null): array {
+    public function getLatestBlockhash(?Commitment $commitment = null): array
+    {
         $object = [
             "commitment" => $this->getCommitmentString($commitment),
         ];
@@ -23,7 +27,8 @@ class Connection extends Program
      * @param Commitment|null $commitment
      * @return bool
      */
-    public function isBlockhashValid(string $blockhash, ?Commitment $commitment = null): bool {
+    public function isBlockhashValid(string $blockhash, ?Commitment $commitment = null): bool
+    {
         $object = [
             "commitment" => $this->getCommitmentString($commitment),
         ];
@@ -34,14 +39,17 @@ class Connection extends Program
      * @param Commitment|null $commitment
      * @return string
      */
-    public function getCommitmentString(?Commitment $commitment = null) {
-        if ($commitment === null) return Commitment::finalized()->__toString();
+    public function getCommitmentString(?Commitment $commitment = null): string
+    {
+        if (null === $commitment) {
+            return Commitment::finalized()->__toString();
+        }
         return $commitment->__toString();
     }
 
     /**
      * @param string $pubKey
-     * @return array
+     * @return array<mixed>
      */
     public function getAccountInfo(string $pubKey): array
     {
@@ -65,7 +73,7 @@ class Connection extends Program
 
     /**
      * @param string $transactionSignature
-     * @return array|null
+     * @return array<mixed>|null
      */
     public function getConfirmedTransaction(string $transactionSignature): array
     {
@@ -73,24 +81,26 @@ class Connection extends Program
     }
 
     /**
-     * NEW: This method is only available in solana-core v1.7 or newer. Please use getConfirmedTransaction for solana-core v1.6
+     * NEW: This method is only available in solana-core v1.7 or newer.
+     * > Please use getConfirmedTransaction for solana-core v1.6
      *
      * @param string $transactionSignature
-     * @return array|null
+     * @param Commitment|null $commitment
+     * @return array<mixed>|null
      */
     public function getTransaction(string $transactionSignature, ?Commitment $commitment = null): array
     {
-      $config = [
+        $config = [
         "maxSupportedTransactionVersion" => 0,
         "commitment" => $this->getCommitmentString($commitment),
-      ];
-      return $this->client->call('getTransaction', [$transactionSignature, $config]);
+        ];
+        return $this->client->call('getTransaction', [$transactionSignature, $config]);
     }
 
     /**
      * @deprecated
      * @param Commitment|null $commitment
-     * @return array
+     * @return array<mixed>
      * @throws Exceptions\GenericException|Exceptions\MethodNotFoundException|Exceptions\InvalidIdResponseException
      */
     public function getRecentBlockhash(?Commitment $commitment = null): array
@@ -101,13 +111,13 @@ class Connection extends Program
     /**
      * @param Transaction $transaction
      * @param Keypair[] $signers
-     * @param array $params
-     * @return array|\Illuminate\Http\Client\Response
+     * @param array<mixed> $params
+     * @return array<mixed>|Response
      * @throws Exceptions\GenericException
      * @throws Exceptions\InvalidIdResponseException
      * @throws Exceptions\MethodNotFoundException
      */
-    public function sendTransaction(Transaction $transaction, array $signers, array $params = [])
+    public function sendTransaction(Transaction $transaction, array $signers, array $params = []): array|Response
     {
         if (! $transaction->recentBlockhash) {
             $transaction->recentBlockhash = $this->getRecentBlockhash()['blockhash'];
@@ -119,40 +129,43 @@ class Connection extends Program
 
         $hashString = sodium_bin2base64($rawBinaryString, SODIUM_BASE64_VARIANT_ORIGINAL);
 
-        $send_params = ['encoding' => 'base64', 'preflightCommitment' => 'confirmed'];
-        if (!is_array($params))
+        $sendParams = ['encoding' => 'base64', 'preflightCommitment' => 'confirmed'];
+        if (!is_array($params)) {
             $params = [];
-        foreach ($params as $k=>$v)
-            $send_params[$k] = $v;
-        
-        return $this->client->call('sendTransaction', [$hashString, $send_params]);
+        }
+        foreach ($params as $k => $v) {
+            $sendParams[$k] = $v;
+        }
+
+        return $this->client->call('sendTransaction', [$hashString, $sendParams]);
     }
-    
-    
+
+
     /**
-	 * @param Transaction $transaction
-	 * @param Keypair[] $signers
-	 * @param array $params
-	 * @return array|\Illuminate\Http\Client\Response
-	 * @throws Exceptions\GenericException
-	 * @throws Exceptions\InvalidIdResponseException
-	 * @throws Exceptions\MethodNotFoundException
-	 */
-	public function simulateTransaction(Transaction $transaction, array $signers, array $params = [])
-	{
-		$transaction->sign(...$signers);
-		
-		$rawBinaryString = $transaction->serialize(false);
-		
-		$hashString = sodium_bin2base64($rawBinaryString, SODIUM_BASE64_VARIANT_ORIGINAL);
-		
-		$send_params = ['encoding' => 'base64', 'commitment' => 'confirmed', 'sigVerify'=>true];
-		if (!is_array($params))
-			$params = [];
-		foreach ($params as $k=>$v)
-			$send_params[$k] = $v;
-		
-		return $this->client->call('simulateTransaction', [$hashString, $send_params]);
-	}
-    
+     * @param Transaction $transaction
+     * @param Keypair[] $signers
+     * @param array<mixed> $params
+     * @return array<mixed>|Response
+     * @throws Exceptions\GenericException
+     * @throws Exceptions\InvalidIdResponseException
+     * @throws Exceptions\MethodNotFoundException
+     */
+    public function simulateTransaction(Transaction $transaction, array $signers, array $params = []): array|Response
+    {
+        $transaction->sign(...$signers);
+
+        $rawBinaryString = $transaction->serialize(false);
+
+        $hashString = sodium_bin2base64($rawBinaryString, SODIUM_BASE64_VARIANT_ORIGINAL);
+
+        $sendParams = ['encoding' => 'base64', 'commitment' => 'confirmed', 'sigVerify' => true];
+        if (!is_array($params)) {
+            $params = [];
+        }
+        foreach ($params as $k => $v) {
+            $sendParams[$k] = $v;
+        }
+
+        return $this->client->call('simulateTransaction', [$hashString, $sendParams]);
+    }
 }

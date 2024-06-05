@@ -1,8 +1,10 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Accounts;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Borsh;
+namespace MultipleChain\SolanaSDK\Accounts;
+
+use MultipleChain\SolanaSDK\Borsh;
 
 class MetadataData
 {
@@ -25,7 +27,12 @@ class MetadataData
         ],
     ];
 
-    public function __set($name, $value): void
+    /**
+     * @param mixed $name
+     * @param mixed $value
+     * @return void
+     */
+    public function __set(mixed $name, mixed $value): void
     {
         $this->{$name} = is_string($value) ? preg_replace('/[[:cntrl:]]/', '', $value) : $value;
     }

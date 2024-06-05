@@ -1,19 +1,21 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Util\Buffer;
-use Tighten\SolanaPhpSdk\Util\HasPublicKey;
-use Tighten\SolanaPhpSdk\Util\HasSecretKey;
+namespace MultipleChain\SolanaSDK;
+
+use MultipleChain\SolanaSDK\Util\Buffer;
+use MultipleChain\SolanaSDK\Util\HasPublicKey;
+use MultipleChain\SolanaSDK\Util\HasSecretKey;
 
 class Account implements HasPublicKey, HasSecretKey
 {
     protected Keypair $keypair;
 
     /**
-     * @param  $secretKey
+     * @param mixed $secretKey
      */
-    public function __construct($secretKey = null)
+    public function __construct(mixed $secretKey = null)
     {
         if ($secretKey) {
             $secretKeyString = Buffer::from($secretKey)->toString();

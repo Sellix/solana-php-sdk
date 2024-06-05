@@ -1,10 +1,11 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Borsh;
+declare(strict_types=1);
 
-use Tighten\SolanaPhpSdk\Exceptions\BaseSolanaPhpSdkException;
+namespace MultipleChain\SolanaSDK\Borsh;
+
+use MultipleChain\SolanaSDK\Exceptions\BaseSolanaPhpSdkException;
 
 class BorshException extends BaseSolanaPhpSdkException
 {
-
 }

@@ -1,6 +1,8 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Borsh;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK\Borsh;
 
 trait BorshDeserializable
 {
@@ -17,10 +19,11 @@ trait BorshDeserializable
     }
 
     /**
-     * @param $name
-     * @param $value
+     * @param mixed $name
+     * @param mixed $value
+     * @return void
      */
-    public function __set($name, $value)
+    public function __set(mixed $name, mixed $value): void
     {
         $this->{$name} = $value;
     }

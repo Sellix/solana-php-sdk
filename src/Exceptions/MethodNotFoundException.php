@@ -1,10 +1,11 @@
 <?php
 
-namespace Tighten\SolanaPhpSdk\Exceptions;
+declare(strict_types=1);
+
+namespace MultipleChain\SolanaSDK\Exceptions;
 
 use Exception;
 
 class MethodNotFoundException extends Exception
 {
-
 }
