@@ -63,10 +63,14 @@ class Keypair implements HasPublicKey, HasSecretKey
      */
     public static function from(string $keypair): Keypair
     {
-        return new static(
-            sodium_crypto_sign_publickey($keypair),
-            sodium_crypto_sign_secretkey($keypair)
-        );
+        if (strlen($keypair) > 0) {
+            return new Keypair(
+                sodium_crypto_sign_publickey($keypair),
+                sodium_crypto_sign_secretkey($keypair)
+            );
+        } else {
+            throw new SodiumException('Invalid keypair');
+        }
     }
 
     /**
@@ -83,12 +87,16 @@ class Keypair implements HasPublicKey, HasSecretKey
     {
         $secretKey = Buffer::from($secretKey)->toString();
 
-        $publicKey = sodium_crypto_sign_publickey_from_secretkey($secretKey);
+        if (strlen($secretKey) > 0) {
+            $publicKey = sodium_crypto_sign_publickey_from_secretkey($secretKey);
 
-        return new static(
-            $publicKey,
-            $secretKey
-        );
+            return new Keypair(
+                $publicKey,
+                $secretKey
+            );
+        } else {
+            throw new SodiumException('Invalid secret key');
+        }
     }
 
     /**
@@ -102,9 +110,13 @@ class Keypair implements HasPublicKey, HasSecretKey
     {
         $seed = Buffer::from($seed)->toString();
 
-        $keypair = sodium_crypto_sign_seed_keypair($seed);
+        if (strlen($seed) > 0) {
+            $keypair = sodium_crypto_sign_seed_keypair($seed);
 
-        return static::from($keypair);
+            return static::from($keypair);
+        } else {
+            throw new SodiumException('Invalid seed');
+        }
     }
 
     /**

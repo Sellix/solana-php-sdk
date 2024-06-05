@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MultipleChain\SolanaSDK;
 
 use Illuminate\Http\Client\Response;
+use MultipleChain\SolanaSDK\Util\Signer;
 use MultipleChain\SolanaSDK\Util\Commitment;
 use MultipleChain\SolanaSDK\Exceptions\AccountNotFoundException;
 
@@ -75,7 +76,7 @@ class Connection extends Program
      * @param string $transactionSignature
      * @return array<mixed>|null
      */
-    public function getConfirmedTransaction(string $transactionSignature): array
+    public function getConfirmedTransaction(string $transactionSignature): ?array
     {
         return $this->client->call('getConfirmedTransaction', [$transactionSignature]);
     }
@@ -88,12 +89,13 @@ class Connection extends Program
      * @param Commitment|null $commitment
      * @return array<mixed>|null
      */
-    public function getTransaction(string $transactionSignature, ?Commitment $commitment = null): array
+    public function getTransaction(string $transactionSignature, ?Commitment $commitment = null): ?array
     {
         $config = [
-        "maxSupportedTransactionVersion" => 0,
-        "commitment" => $this->getCommitmentString($commitment),
+            "maxSupportedTransactionVersion" => 0,
+            "commitment" => $this->getCommitmentString($commitment),
         ];
+
         return $this->client->call('getTransaction', [$transactionSignature, $config]);
     }
 
@@ -110,7 +112,7 @@ class Connection extends Program
 
     /**
      * @param Transaction $transaction
-     * @param Keypair[] $signers
+     * @param array<Signer|Keypair> $signers
      * @param array<mixed> $params
      * @return array<mixed>|Response
      * @throws Exceptions\GenericException
@@ -123,6 +125,7 @@ class Connection extends Program
             $transaction->recentBlockhash = $this->getRecentBlockhash()['blockhash'];
         }
 
+        // @phpstan-ignore-next-line
         $transaction->sign(...$signers);
 
         $rawBinaryString = $transaction->serialize(false);
@@ -143,7 +146,7 @@ class Connection extends Program
 
     /**
      * @param Transaction $transaction
-     * @param Keypair[] $signers
+     * @param array<Signer|Keypair> $signers
      * @param array<mixed> $params
      * @return array<mixed>|Response
      * @throws Exceptions\GenericException
@@ -152,6 +155,7 @@ class Connection extends Program
      */
     public function simulateTransaction(Transaction $transaction, array $signers, array $params = []): array|Response
     {
+        // @phpstan-ignore-next-line
         $transaction->sign(...$signers);
 
         $rawBinaryString = $transaction->serialize(false);

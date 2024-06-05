@@ -11,10 +11,11 @@ trait BorshDeserializable
      *
      * Note: must override when the default constructor required parameters!
      *
-     * @return $this
+     * @return static
      */
-    public static function borshConstructor()
+    public static function borshConstructor(): static
     {
+        // @phpstan-ignore-next-line
         return new static();
     }
 

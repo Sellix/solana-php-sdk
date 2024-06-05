@@ -12,12 +12,21 @@ use MultipleChain\SolanaSDK\Exceptions\InputValidationException;
 
 class Message
 {
+    /**
+     * @var MessageHeader
+     */
     public MessageHeader $header;
+
     /**
      * @var array<PublicKey>
      */
     public array $accountKeys;
+
+    /**
+     * @var string
+     */
     public string $recentBlockhash;
+
     /**
      * @var array<CompiledInstruction>
      */
@@ -101,8 +110,9 @@ class Message
      */
     public function nonProgramIds(): array
     {
+        // @phpstan-ignore-next-line
         return array_filter($this->accountKeys, function (PublicKey $account, $index) {
-            return ! $this->isProgramId($index);
+            return !$this->isProgramId($index);
         });
     }
 
@@ -136,11 +146,11 @@ class Message
         }
 
         return [
-            // uint8
+            // uint8 @phpstan-ignore-next-line
             ...unpack("C*", pack("C", $this->header->numRequiredSignature)),
-            // uint8
+            // uint8 @phpstan-ignore-next-line
             ...unpack("C*", pack("C", $this->header->numReadonlySignedAccounts)),
-            // uint8
+            // uint8 @phpstan-ignore-next-line
             ...unpack("C*", pack("C", $this->header->numReadonlyUnsignedAccounts)),
 
             ...ShortVec::encodeLength(sizeof($this->accountKeys)),
@@ -161,7 +171,7 @@ class Message
         ;
 
         return [
-            // uint8
+            // uint8 @phpstan-ignore-next-line
             ...unpack("C*", pack("C", $instruction->programIdIndex)),
 
             ...ShortVec::encodeLength(sizeof($accounts)),
@@ -184,9 +194,9 @@ class Message
             throw new InputValidationException('Byte representation of message is missing message header.');
         }
 
-        $numRequiredSignatures = $rawMessage->shift();
-        $numReadonlySignedAccounts = $rawMessage->shift();
-        $numReadonlyUnsignedAccounts = $rawMessage->shift();
+        $numRequiredSignatures = $rawMessage->shift() ?? 0;
+        $numReadonlySignedAccounts = $rawMessage->shift() ?? 0;
+        $numReadonlyUnsignedAccounts = $rawMessage->shift() ?? 0;
         $header = new MessageHeader($numRequiredSignatures, $numReadonlySignedAccounts, $numReadonlyUnsignedAccounts);
 
         $accountKeys = [];
@@ -205,7 +215,7 @@ class Message
         list($instructionCount, $offset) = ShortVec::decodeLength($rawMessage);
         $rawMessage = $rawMessage->slice($offset);
         for ($i = 0; $i < $instructionCount; $i++) {
-            $programIdIndex = $rawMessage->shift();
+            $programIdIndex = $rawMessage->shift() ?? 0;
 
             list ($accountsLength, $offset) = ShortVec::decodeLength($rawMessage);
             $rawMessage = $rawMessage->slice($offset);

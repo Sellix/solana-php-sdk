@@ -63,7 +63,7 @@ class PublicKey implements HasPublicKey
      */
     public static function default(): PublicKey
     {
-        return new static('11111111111111111111111111111111');
+        return new PublicKey('11111111111111111111111111111111');
     }
 
     /**

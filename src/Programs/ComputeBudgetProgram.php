@@ -27,9 +27,9 @@ class ComputeBudgetProgram extends Program
     public static function setComputeUnitLimit(array $units): TransactionInstruction
     {
         $data = [
-            // uint8
+            // uint8 @phpstan-ignore-next-line
             ...unpack("C*", pack("C", 2)),
-            // uint32
+            // uint32 @phpstan-ignore-next-line
             ...unpack("C*", pack("V", $units)),
         ];
         return new TransactionInstruction(
@@ -46,9 +46,9 @@ class ComputeBudgetProgram extends Program
     public static function setComputeUnitPrice(array $microLamports): TransactionInstruction
     {
         $data = [
-            // uint8
+            // uint8 @phpstan-ignore-next-line
             ...unpack("C*", pack("C", 3)),
-            // uint64
+            // uint64 @phpstan-ignore-next-line
             ...unpack("C*", pack("P", $microLamports)),
         ];
         return new TransactionInstruction(

@@ -65,8 +65,8 @@ class Buffer implements Countable
 
             // unpack returns an array indexed at 1.
             $this->data = $isString
-                ? array_values(unpack("C*", $value))
-                : array_values(unpack("C*", pack($this->computedFormat(), $value)));
+                ? array_values(unpack("C*", $value) ?: [])
+                : array_values(unpack("C*", pack($this->computedFormat(), $value)) ?: []);
         } elseif (is_array($value)) {
             $this->data = $value;
         } elseif ($value instanceof PublicKey) {
@@ -78,6 +78,7 @@ class Buffer implements Countable
         } elseif (null == $value) {
             $this->data = [];
         } elseif (method_exists($value, 'toArray')) {
+            // @phpstan-ignore-next-line
             $this->data = $value->toArray();
         } else {
             throw new InputValidationException('Unsupported $value for Buffer: ' . get_class($value));
@@ -92,7 +93,7 @@ class Buffer implements Countable
      */
     public static function from(mixed $value = null, ?string $format = null, ?bool $signed = null): Buffer
     {
-        return new static($value, $format, $signed);
+        return new Buffer($value, $format, $signed);
     }
 
     /**
@@ -105,7 +106,7 @@ class Buffer implements Countable
     {
         $value = PublicKey::base58()->decode($value);
 
-        return new static($value);
+        return new Buffer($value);
     }
 
     /**
@@ -171,6 +172,7 @@ class Buffer implements Countable
     {
         $fixedSizeData = SplFixedArray::fromArray($this->data);
         $fixedSizeData->setSize($size);
+        // @phpstan-ignore-next-line
         $this->data = $fixedSizeData->toArray();
 
         return $this;
@@ -230,7 +232,7 @@ class Buffer implements Countable
         if (self::TYPE_STRING === $this->datatype) {
             return ord(pack("C*", ...$this->toArray()));
         } else {
-            return unpack($this->computedFormat(), pack("C*", ...$this->toArray()))[1];
+            return (unpack($this->computedFormat(), pack("C*", ...$this->toArray())) ?: [])[1] ?: null;
         }
     }
 

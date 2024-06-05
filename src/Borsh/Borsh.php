@@ -57,7 +57,7 @@ class Borsh
      * @param array<mixed> $schema
      * @param string|null $fieldName
      * @param mixed $value
-     * @param array<mixed> $fieldType
+     * @param mixed $fieldType
      * @param BinaryWriter $writer
      * @return void
      */
@@ -65,7 +65,7 @@ class Borsh
         array $schema,
         ?string $fieldName,
         mixed $value,
-        array $fieldType,
+        mixed $fieldType,
         BinaryWriter $writer
     ): void {
         if (is_string($fieldType)) {
@@ -146,7 +146,7 @@ class Borsh
         }
 
         if ('struct' === $objectSchema['kind']) {
-            if (! method_exists($class, 'borshConstructor')) {
+            if (!method_exists($class, 'borshConstructor')) {
                 throw new BorshException(
                     "Class {$class} does not implement borshConstructor. Please use the BorshDeserialize trait."
                 );
@@ -171,17 +171,17 @@ class Borsh
     /**
      * @param array<mixed> $schema
      * @param string|null $fieldName
-     * @param array<mixed> $fieldType
+     * @param mixed $fieldType
      * @param BinaryReader $reader
      * @return mixed
      */
     protected static function deserializeField(
         array $schema,
         ?string $fieldName,
-        array $fieldType,
+        mixed $fieldType,
         BinaryReader $reader
     ): mixed {
-        if (is_string($fieldType) && ! class_exists($fieldType)) {
+        if (is_string($fieldType) && !class_exists($fieldType)) {
             return $reader->{'read' . ucfirst($fieldType)}();
         }
 
@@ -210,6 +210,7 @@ class Borsh
             return null;
         }
 
+        // @phpstan-ignore-next-line
         return static::deserializeObject($schema, $fieldType, $reader);
     }
 }

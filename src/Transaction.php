@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MultipleChain\SolanaSDK;
 
+use SodiumException;
 use MultipleChain\SolanaSDK\Util\Signer;
 use MultipleChain\SolanaSDK\Util\Buffer;
 use MultipleChain\SolanaSDK\Util\ShortVec;
@@ -84,7 +85,7 @@ class Transaction
         $this->recentBlockhash = $recentBlockhash;
         $this->nonceInformation = $nonceInformation;
         $this->feePayer = $feePayer;
-        $this->signatures = $signatures;
+        $this->signatures = $signatures ?? [];
     }
 
     /**
@@ -164,10 +165,6 @@ class Transaction
         $accountMetas = [];
 
         foreach ($this->instructions as $i => $instruction) {
-            if (! $instruction->programId) {
-                throw new InputValidationException("Transaction instruction index {$i} has undefined program id.");
-            }
-
             array_push($accountMetas, ...$instruction->keys);
 
             $programId = $instruction->programId->toBase58();
@@ -280,10 +277,10 @@ class Transaction
             $programIdIndex = array_search($instruction->programId->toBase58(), $accountKeys);
             $encodedData = $instruction->data;
             $accounts = array_map(function (AccountMeta $meta) use ($accountKeys) {
-                return array_search($meta->getPublicKey()->toBase58(), $accountKeys);
+                return (int) array_search($meta->getPublicKey()->toBase58(), $accountKeys);
             }, $instruction->keys);
             return new CompiledInstruction(
-                $programIdIndex,
+                (int) $programIdIndex,
                 $accounts,
                 $encodedData
             );
@@ -372,8 +369,13 @@ class Transaction
     {
         $message = $this->compileMessage();
         $signData = $message->serialize();
-        $signature = sodium_crypto_sign_detached($signData, $this->toSecretKey($signer));
-        $this->_addSignature($signer->getPublicKey(), $signature);
+        $secretKey = $this->toSecretKey($signer);
+        if (strlen($signData) > 0 && strlen($secretKey) > 0) {
+            $signature = sodium_crypto_sign_detached($signData, $secretKey);
+            $this->_addSignature($signer->getPublicKey(), $signature);
+        } else {
+            throw new SodiumException('Transaction has not been compiled');
+        }
     }
 
     /**
@@ -422,11 +424,16 @@ class Transaction
 
         foreach ($uniqueSigners as $signer) {
             if ($signer instanceof Keypair) {
-                $signature = sodium_crypto_sign_detached($signData, $this->toSecretKey($signer));
-                if (self::SIGNATURE_LENGTH != strlen($signature)) {
-                    throw new InputValidationException('Signature has invalid length.');
+                $secretKey = $this->toSecretKey($signer);
+                if (strlen($signData) > 0 && strlen($secretKey) > 0) {
+                    $signature = sodium_crypto_sign_detached($signData, $secretKey);
+                    if (self::SIGNATURE_LENGTH != strlen($signature)) {
+                        throw new InputValidationException('Signature has invalid length.');
+                    }
+                    $this->_addSignature($this->toPublicKey($signer), $signature);
+                } else {
+                    throw new SodiumException('Transaction has not been compiled');
                 }
-                $this->_addSignature($this->toPublicKey($signer), $signature);
             }
         }
     }
@@ -447,7 +454,7 @@ class Transaction
             throw new InputValidationException('Signature has invalid length.');
         }
 
-//        $this->compile(); // Ensure signatures array is populated
+        // $this->compile(); // Ensure signatures array is populated
         $this->_addSignature($publicKey, $signature);
     }
 
@@ -459,6 +466,7 @@ class Transaction
     // @phpcs:ignore
     protected function _addSignature(PublicKey $publicKey, string $signature): void
     {
+        // @phpstan-ignore-next-line
         $indexOfPublicKey = $this->arraySearchAccountMetaForPublicKey($this->signatures, $publicKey);
 
         if (-1 === $indexOfPublicKey) {
@@ -490,12 +498,15 @@ class Transaction
                     return false;
                 }
             } else {
+                $args = [
+                    $signature->signature,
+                    $signData,
+                    $signature->getPublicKey()->toBinaryString()
+                ];
+
                 if (
-                    !sodium_crypto_sign_verify_detached(
-                        $signature->signature,
-                        $signData,
-                        $signature->getPublicKey()->toBinaryString()
-                    )
+                    // @phpstan-ignore-next-line
+                    !sodium_crypto_sign_verify_detached(...$args)
                 ) {
                     return false;
                 }
@@ -508,8 +519,8 @@ class Transaction
     /**
      * Serialize the Transaction in the wire format.
      *
-     * @param bool|null $requireAllSignature
-     * @param bool|null $verifySignatures
+     * @param bool $requireAllSignature
+     * @param bool $verifySignatures
      * @return string
      */
     public function serialize(bool $requireAllSignature = true, bool $verifySignatures = true): string
@@ -617,6 +628,7 @@ class Transaction
         foreach ($message->instructions as $instruction) {
             $keys = array_map(function (int $accountIndex) use ($transaction, $message) {
                 $publicKey = $message->accountKeys[$accountIndex];
+                // @phpstan-ignore-next-line
                 $isSigner = -1 !== static::arraySearchAccountMetaForPublicKey($transaction->signatures, $publicKey)
                     || $message->isAccountSigner($accountIndex);
                 $isWritable = $message->isAccountWritable($accountIndex);
@@ -636,12 +648,12 @@ class Transaction
     /**
      * @param array<AccountMeta> $haystack
      * @param PublicKey|SignaturePubkeyPair|AccountMeta|string $needle
-     * @return int|string
+     * @return int
      */
     protected static function arraySearchAccountMetaForPublicKey(
         array $haystack,
         PublicKey|SignaturePubkeyPair|AccountMeta|string $needle
-    ): int|string {
+    ): int {
         $publicKeyToSearchFor = static::toPublicKey($needle);
 
         foreach ($haystack as $i => $item) {

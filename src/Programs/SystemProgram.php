@@ -86,9 +86,9 @@ class SystemProgram extends Program
         // 4 byte instruction index + 8 bytes lamports
         // look at https://www.php.net/manual/en/function.pack.php for formats.
         $data = [
-            // uint32
+            // uint32 @phpstan-ignore-next-line
             ...unpack("C*", pack("V", self::PROGRAM_INDEX_TRANSFER)),
-            // int64
+            // int64 @phpstan-ignore-next-line
             ...unpack("C*", pack("P", $lamports)),
         ];
         $keys = [
@@ -122,11 +122,11 @@ class SystemProgram extends Program
     ): TransactionInstruction {
         // look at https://www.php.net/manual/en/function.pack.php for formats.
         $data = [
-            // uint32
+            // uint32 @phpstan-ignore-next-line
             ...unpack("C*", pack("V", self::PROGRAM_INDEX_CREATE_ACCOUNT)),
-            // int64
+            // int64 @phpstan-ignore-next-line
             ...unpack("C*", pack("P", $lamports)),
-            // int64
+            // int64 @phpstan-ignore-next-line
             ...unpack("C*", pack("P", $space)),
             ...$programId->toBytes(),
         ];

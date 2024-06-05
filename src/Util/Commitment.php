@@ -33,27 +33,27 @@ class Commitment
     }
 
     /**
-     * @return static
+     * @return Commitment
      */
     public static function finalized(): Commitment
     {
-        return new static(static::FINALIZED);
+        return new Commitment(static::FINALIZED);
     }
 
     /**
-     * @return static
+     * @return Commitment
      */
     public static function confirmed(): Commitment
     {
-        return new static(static::CONFIRMED);
+        return new Commitment(static::CONFIRMED);
     }
 
     /**
-     * @return static
+     * @return Commitment
      */
     public static function processed(): Commitment
     {
-        return new static(static::PROCESSED);
+        return new Commitment(static::PROCESSED);
     }
 
     /**
