@@ -5,7 +5,8 @@
 
 ---
 
-This package has been forked to be developed at MultipleChain to provide infrastructure for Solana. We are not adding it internally to MultipleChain because MultipleChain is an interface that covers all Blockchain networks. But for those who just want to do something for Solana, we aim to make something that covers everything in Solana/Web3.js.
+NOTE: This package has been forked to be developed at MultipleChain to provide infrastructure for Solana. We are not adding it internally to MultipleChain because MultipleChain is an interface that covers all Blockchain networks. But for those who just want to do something for Solana, we aim to make something that covers everything in Solana/Web3.js.
+
 ---
 
 Simple PHP SDK for Solana.
@@ -101,6 +102,7 @@ If you discover any security related issues, please create an issue in this repo
 
 - [Matt Stauffer](https://github.com/mattstauffer) (Original creator)
 - [Zach Vander Velden](https://github.com/exzachlyvv) (Metadata wizard)
+- [Halil Beycan](https://github.com/beycandeveloper) (Maintainer)
 - [All Contributors](../../contributors)
 
 ## License
