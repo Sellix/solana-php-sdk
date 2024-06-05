@@ -8,9 +8,9 @@ use MultipleChain\SolanaSDK\Exceptions\InputValidationException;
 
 class Commitment
 {
-    public const FINALIZED = 'finalized';
-    public const CONFIRMED = 'confirmed';
-    public const PROCESSED = 'processed';
+    private const FINALIZED = 'finalized';
+    private const CONFIRMED = 'confirmed';
+    private const PROCESSED = 'processed';
 
     protected string $commitmentLevel;
 

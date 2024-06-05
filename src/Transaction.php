@@ -125,6 +125,42 @@ class Transaction
     }
 
     /**
+     * @param PublicKey $feePayer
+     * @return Transaction
+     */
+    public function setFeePayer(PublicKey $feePayer): Transaction
+    {
+        $this->feePayer = $feePayer;
+        return $this;
+    }
+
+    /**
+     * @return PublicKey
+     */
+    public function getFeePayer(): PublicKey
+    {
+        return $this->feePayer;
+    }
+
+    /**
+     * @param string $recentBlockhash
+     * @return Transaction
+     */
+    public function setRecentBlockhash(string $recentBlockhash): Transaction
+    {
+        $this->recentBlockhash = $recentBlockhash;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecentBlockhash(): string
+    {
+        return $this->recentBlockhash;
+    }
+
+    /**
      * Compile transaction data
      *
      * @return Message

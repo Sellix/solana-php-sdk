@@ -121,7 +121,7 @@ class Connection extends Program
      */
     public function sendTransaction(Transaction $transaction, array $signers, array $params = []): array|Response
     {
-        if (! $transaction->recentBlockhash) {
+        if (!$transaction->recentBlockhash) {
             $transaction->recentBlockhash = $this->getRecentBlockhash()['blockhash'];
         }
 
@@ -132,9 +132,11 @@ class Connection extends Program
         $hashString = sodium_bin2base64($rawBinaryString, SODIUM_BASE64_VARIANT_ORIGINAL);
 
         $sendParams = ['encoding' => 'base64', 'preflightCommitment' => 'confirmed'];
+
         if (!is_array($params)) {
             $params = [];
         }
+
         foreach ($params as $k => $v) {
             $sendParams[$k] = $v;
         }
@@ -142,6 +144,27 @@ class Connection extends Program
         return $this->client->call('sendTransaction', [$hashString, $sendParams]);
     }
 
+    /**
+     * @param string $rawBinaryString
+     * @param array<mixed> $params
+     * @return string
+     */
+    public function sendRawTransaction(string $rawBinaryString, array $params = []): string
+    {
+        $hashString = sodium_bin2base64($rawBinaryString, SODIUM_BASE64_VARIANT_ORIGINAL);
+
+        $sendParams = ['encoding' => 'base64', 'preflightCommitment' => 'confirmed'];
+
+        if (!is_array($params)) {
+            $params = [];
+        }
+
+        foreach ($params as $k => $v) {
+            $sendParams[$k] = $v;
+        }
+
+        return $this->client->call('sendTransaction', [$hashString, $sendParams]);
+    }
 
     /**
      * @param Transaction $transaction

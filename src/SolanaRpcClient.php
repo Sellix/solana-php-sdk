@@ -58,6 +58,27 @@ class SolanaRpcClient
     }
 
     /**
+     * @param string $network
+     * @return SolanaRpcClient
+     * @throws \Exception
+     */
+    public static function from(string $network): SolanaRpcClient
+    {
+        switch ($network) {
+            case 'local':
+                return new self(self::LOCAL_ENDPOINT);
+            case 'devnet':
+                return new self(self::DEVNET_ENDPOINT);
+            case 'testnet':
+                return new self(self::TESTNET_ENDPOINT);
+            case 'mainnet':
+                return new self(self::MAINNET_ENDPOINT);
+            default:
+                throw new \Exception('Invalid network');
+        }
+    }
+
+    /**
      * @param string $method
      * @param array<mixed> $params
      * @param array<mixed> $headers
