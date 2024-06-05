@@ -32,6 +32,19 @@ class KeypairTest extends TestCase
      * @return void
      */
     // @phpcs:ignore
+    public function it_public_key_from_private_key(): void
+    {
+        $keypair = Keypair::fromPrivateKey(
+            "44gurmbgSzfMZfqhmaUj1nuvbLMCbMyo3shHvJSesAAfLLTzU9p2aB6Jue7XF2ViBirSzbeUMTYVjRmEj5jW4puu"
+        );
+        $this->assertEquals('gEbjuPsW9xwKpUdQ69khDP3kNEw17HTSmLCMu1S9Msm', $keypair->getPublicKey()->toString());
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
     public function it_new_keypair(): void
     {
         $keypair = new Keypair();

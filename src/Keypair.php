@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MultipleChain\SolanaSDK;
 
 use SodiumException;
+use MultipleChain\Utils;
 use MultipleChain\SolanaSDK\Util\Buffer;
 use MultipleChain\SolanaSDK\Util\HasPublicKey;
 use MultipleChain\SolanaSDK\Util\HasSecretKey;
@@ -97,6 +98,17 @@ class Keypair implements HasPublicKey, HasSecretKey
         } else {
             throw new SodiumException('Invalid secret key');
         }
+    }
+
+    /**
+     * Create a keypair from a raw private key byte array.
+     *
+     * @param string $privateKey
+     * @return Keypair
+     */
+    public static function fromPrivateKey(string $privateKey): Keypair
+    {
+        return static::fromSecretKey(Utils::base58Decode($privateKey));
     }
 
     /**
