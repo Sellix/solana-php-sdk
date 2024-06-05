@@ -110,6 +110,14 @@ class Buffer implements Countable
     }
 
     /**
+     * @return array<int>
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
      * @param int $len
      * @param int $val
      * @return $this

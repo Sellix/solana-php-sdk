@@ -21,6 +21,17 @@ class KeypairTest extends TestCase
      * @return void
      */
     // @phpcs:ignore
+    public function it_public_key_from_keypair(): void
+    {
+        $keypair = Keypair::fromSecretKey(json_decode(file_get_contents(__DIR__ . '/keypair.json'), true));
+        $this->assertEquals('6P2UFjKLnf2LHsPAvwLty5XFc2642S2EByW5PgKb7UFD', $keypair->getPublicKey()->toString());
+    }
+
+    /**
+     * @test
+     * @return void
+     */
+    // @phpcs:ignore
     public function it_new_keypair(): void
     {
         $keypair = new Keypair();
